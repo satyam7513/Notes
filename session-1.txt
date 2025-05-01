@@ -1,0 +1,80 @@
+SDLC
+Waterfall vs Agile vs DevOps vs DevSecOps vs AiOps
+
+SDLC
+-------
+Requirements analysis
+Planning
+Design --> General requirements to technical requirements
+Implementation
+Deployment
+Testing
+Maintaince
+
+
+waterfall
+===========
+once requirements are fixed we can't change
+2 years project to go for PROD
+
+
+Agile
+===========
+Final product --> multiple modules --> sprints
+
+login and signup --> sprint-1 --> 30 days
+orders
+menu
+payment
+shipping
+cart
+reviews
+employees
+
+
+
+sprint-1
+----------
+clients UAT(user acceptance testing)
+
+daily standups --> 
+
+95% --> 5 defects, 1 invalid defect
+
+sprint-2 --> orders + 4 defects
+
+15 days 15 days testing and deployment
+
+
+DevOps is the process of building, deploying and testing the code written by developer on the same day instead of doing after complete development.. we can acheive this using continous integration, continous deployment, continous delivery and continous testing. 
+We can do faster releases with less defect using DevOps... basically automation mindset to get the best results
+
+DEV, QA, SIT, UAT, PERF, PRE-PROD, PROD
+
+
+
+Linux --> Linus torvalds
+=================
+UNIX --> Hardware and Software(Unix OS) together
+CPU, RAM, Hard Disk, OS(Software)
+Laptop --> IBM BIOS
+
+Linux --> from the sratch using C language based on unix principles. He invented git to store this
+
+windows
+-----------
+not open source
+costly
+not secure must install anti virus
+slow
+too many graphics
+frequent restarts
+tough to update/upgrade
+
+Linux --> 9MB
+Secure
+high speed --> mostly text
+no need of restarts
+install or update packages is easy
+free, community support
+low resources
