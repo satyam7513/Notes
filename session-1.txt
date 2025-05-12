@@ -32,6 +32,7 @@ reviews
 employees
 
 Difference between waterfall & Agile model:
+====================================================
 
 Waterfall follows a sequential process,where development and operations are Isolated,code is developed first then handed over to operations for testing and 
 deployment.- often resulting in delays, manual process and poor feedback loops.
