@@ -1,0 +1,298 @@
+we are creating the servers and doing the Roboshop-project in Manual way.
+so what is the disadvanatages you have to identify?
+Time, human errors.
+
+ex: 100 logs carry from farm to home. 1.manually 2. take a truck and take it.
+
+shell-scripting: all commands keep it in a file, run it as a file(coding)
+
+if i run a command -> i have a common sense, i can understand whether it is success or not ...
+
+if any programing language it's should follow these one:
+variables
+data types
+functions
+conditions
+loops
+error handling.
+
+coding means 90% desgin + 10% coding.
+
+Devops engineer Coding is required or not?
+
+1.programing --> developers ex: data strctures,algorithms,desgin patterns. 
+               developers goal is less resources (RAM CPU, HD), less time.
+2.scripting --> Devops. (mian thing is simple scripting).
+
+what is the difference B/w Shell vs python?
+
+Os architeccture --> UI-> shell/cmd-> kernal
+UI-> python -> shell/cmd -> kernel
+
+shell is native in Linux.if you want any automation inside linux server shell is the perfetct choice.
+
+python is useful when you are interacting with other systems.
+
+for Example you want to get the information collect with GIthub.on that time python is the best.
+why beacause git is the the other sytem /external systems not in linux.
+(python through API connect and collect the information)
+
+python is 2 types: 
+development - web developemnt like java frame work. 
+scripting.
+
+now go to the shell scripting, where i can store my scripting code?
+
+it's Version control:
+keep code in version control / source code management(SCM).
+code keep it in my laptop what is the problem?
+
+1.security
+2.tough to share the code
+3.No versioning
+
+SCM is 2 types:
+
+centralised vs Distributed:
+===== ======= ============
+
+For example: 
+take google Drive --> 10 members access at a time.
+open google docs in browser and do the changes. this is one option.
+
+download the doc in local laptop, open in word do the changes then upload to drive. this is anohter option.
+
+SVN VS GIT (linus trovdes invented  git also, He stored linux code in one location so he can introduce git )
+
+Git (Github,Gitlab,bitbucket etc ... )
+
+SVN - we are using it previuosly but no versioning concept is there.
+if incase file is deleted, history is not availible.this is the major draw back in SVN.
+
+we are writing the code in notepad/ wordpad its not effective.
+
+so introduce editors:
+IDE (Integrated development env)--> Vs code, eclipse, intellij, sublime etc...
+
+
+
+
+
+code write in VS code --> staging Area -> local commit -> github.
+Devloper push the code in Github.
+if any new releses push other developer in github, we can pull the code on github.
+mainly git is working on push & pull mechanism.
+
+
+
+
+signup with github. create repository -> shell-practice.
+----- ----- --------  ---------------   ---------------
+
+1. create repo in Github.
+2.clone /download the repo. (we can create one folder like Devops/daws-84s/repos)
+   open the VS code and goto that particular folder.(ctrl+ --> zoom in, Ctrl- --> zoom out).
+   
+3.open git bash (where we create repos location than goto that location) 
+git clone URL
+
+cd shell-practice
+goto vs code -> shell-practice -> create file hello-world.
+
+check with git status
+
+4.git add. (Adding into staging Area)
+
+
+first time you login it you can configure it:
+git config --global user.email "ksnaidudba@gmail.com"
+git config --global user.name "satyam"
+git config --list
+
+5.git commit -m "Hello world created"
+  after commit check with git log
+  
+6.git push origin main.
+
+git add . ; git commit -m "hello-world started" ; git push origin main
+
+hello-world.sh
+#!/bin/bash
+
+now i want to run the shell-script, where i can run?
+----       --------------------             ------------
+
+i need one linux server, so i am creating one ec2-instance in linux server.
+
+Login into the Linux server and check git is installed or not.
+
+git clone https://github.com/ksnaidu/shell-practice.git
+
+cd shell-practice
+
+goto vs-code write the code.
+
+ #!/bin/bash  
+ echo "hello-world"
+   
+goto git bash -push the changes
+
+git add . ; git commit -m "hello-world code write" ; git push origin main
+
+goto ec2-instance linux server-> git pull (pull the code changes)
+
+ls -l
+
+hello-world.sh
+
+how to run the shell-script code:
+
+sh <script-name>
+
+sh 01-hello-world.sh
+incase permission-denied error throughs --> exicution access is required.
+chmod +x 01-hello-world.sh
+
+what is the first line:
+#!/bin/bash --> shebang, it should be the first line in shell script, it is the interpeter to check the syntax and execute the commands..
+
+we write 2nd program:
+---------------------------
+02-conversation.sh:
+=========== =========
+
+#!/bin/bash
+
+echo "Trump:: Hey Musk, How are you?"
+echo "Musk:: Hello Trump, I am fine. How are you doing"
+echo "Trump: I am fine too. What's up?"
+echo "Musk:: Nohting, just going to Mars now, will you come?"
+echo "Trump:: Sorry, you carry on! I will come once you come back"
+
+git add . ; git commit -m "02-conversation.sh" ; git push origin main
+
+goto linux server
+git pull
+sh 02-conversation.sh
+
+for Example: 
+x=0, y=1, z=3
+solve the expression and finally substitute variables.
+
+you can identify the code trump & musk repeted every time.
+i want to replace the name trump to Modi. so we replace the variables like person-1 person-2.
+
+
+label --> item
+key=value
+
+variable is a container to hold the value, you can use it wherever you require. and this centralised, if you change at once place it will reflect wherever you use. DRY (Don't repeat yourself)
+args/arguments
+
+
+03.variables.sh
+----------------
+#!/bin/bash
+
+PERSON1=Modi #there should be no space before and after =
+PERSON2=Musk
+
+echo "$PERSON1:: Hey $PERSON2, How are you?"
+echo "$PERSON2:: Hello $PERSON1, I am fine. How are you doing"
+echo "$PERSON1:: I am fine too. What's up?"
+echo "$PERSON2:: Nohting, just going to Mars now, will you come?"
+echo "$PERSON1:: Sorry, you carry on! I will come once you come back"
+
+
+04.variables.sh
+--------------
+#!/bin/bash
+
+PERSON1=$1
+PERSON2=$2
+
+echo "$PERSON1:: Hey $PERSON2, How are you?"
+echo "$PERSON2:: Hello $PERSON1, I am fine. How are you doing"
+echo "$PERSON1:: I am fine too. What's up?"
+echo "$PERSON2:: Nohting, just going to Mars now, will you come?"
+echo "$PERSON1:: Sorry, you carry on! I will come once you come back"
+
+sh 04.variable.sh value1 value2
+$!=value1
+$2=value2
+
+
+05.variables.sh
+--------------------
+#!/bin/bash
+
+echo "Enter your pin number::"
+
+read -s PIN #here PIN is variable
+
+echo "Your number is: $PIN"
+
+
+Data Types
+===========
+int i=0
+float
+double   decimal   string  char boolen 
+
+
+06.data-types.sh:
+------------------
+
+#!/bin/bash
+
+# this is comment
+NUMBER1=100
+NUMBER2=200
+
+TIMESTAMP=$(date)
+echo "Script executed at: $TIMESTAMP"
+SUM=$(($NUMBER1+$NUMBER2))
+
+echo "SUM of $NUMBER1 and $NUMBER2 is: $SUM"
+
+
+Array - Arraylist set map
+
+$NAME == ${NAME}
+
+
+
+
+07.arrays.sh
+-----------------
+#!/bin/bash
+
+MOVIES=("Court" "HIT3" "PUSHPA2" "Thandel")
+
+echo "First Movie: ${MOVIES[0]}"
+echo "last Movie: ${MOVIES[3]}"
+echo "First Movie: ${MOVIES[4]}"
+
+echo "All movies: ${MOVIES[@]}"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

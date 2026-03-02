@@ -1,0 +1,182 @@
+AMI--> base os--> redhat 9 is the base oS, companies using this os.
+redhat 9 + nginx + applications + packages --> take it as an image.
+
+ex: you have purchased one new laptop, you have getting laptop through OS+Antivirus+ms-oofice like that.
+
+pre configured OS with some packeges is called AMI.
+
+what is public-ip & private-ip?
+
+Goto CMD prompt and give IPconfig --> see the IPV4 address.
+   192.168.1.100 --> private-ip
+Goto browser and type what is my IP --> 223.189.76.184 --> public-ip.
+
+both are getting different ip address,  why it's happening?
+
+
+
+Internet → Public network (everyone can use)
+
+Intranet → Private network (only specific people can use)
+
+private-ip : internal communication should be done using private-ip.
+
+public-ip: Outside of network we must use public-ip.
+
+aws-cloud servers are in USA, we are in India so we can connect through public-ip.
+
+ssh ec2-user@public-ip --> connect to the server.
+
+explain about Robshop-architecture. it's online roboshop sellings.
+
+
+Linux is a physical-server... nginx is virtual server running in linux server. (Don't confuse )
+
+
+GOTO 	ROBOSHOP DOCUMENTATION.
+==================================
+
+frontend, catalogue, mongodb.(first we have to configure this servers)
+
+Frontend: web content over NGINX is used, basically architecture team willbe decide to which one is used for the webcontent.
+
+popular web servers:
+
+Apache http server: configurations are tough.
+
+Nginx:configurations easy (spring boot,java purposes).
+
+Apache Tomcat: its old web applications, PHP applications for this one use.
+
+dnf install nginx -y --> install nginx.
+
+dnf module list nginx  --> shows the listed nginx modules.
+
+dnf module disable nginx -y  --> which nginx version is already installed than disable.why because i need install particual version of nignx.
+dnf module enable nginx:1.24 -y
+dnf install nginx -y
+
+systemctl start nginx --> start nginx
+
+systemctl status nginx  --> check the status
+
+ps -ef | grep nginx --> check the process
+
+netstat -lntp -->  check the port number.
+  
+http://pub-ip:port no  --> check the Nginx page open or not.
+
+systemctl enable nginx
+
+must and shoud you know some files in NGINX:
+
+/etc/nginx --> configurations availible (mobile apps in settings like that )
+
+you must restart the service when there are some configurations changes.
+
+cd /etc/nginx --> ls -l
+vim nginx.conf
+
+: set nu --> set the numbers.
+
+root:  /usr/share/nginx/html --> see the html code.
+
+cd /usr/share/nginx/html  --> ls -l
+
+index.html - what is the code is stored in this file its dispalyed in the web page.
+
+remove the default content, i should replace our content (code)
+
+cd /usr/share/nginx/html --> rm -rf *
+ls -l - total 0 --> check the content is there or not.
+
+Download the frontend content
+curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip
+
+frontend.zip --> developers give that location, where the code is availible.
+
+cd /usr/share/nginx/html
+unzip /tmp/frontend.zip
+
+vim /etc/nginx/nginx.conf -- change the defalut configuration also.
+
+i can delete the Entire content: using :%d
+
+Restart nginx configuration:
+
+sytemctl restart nginx
+
+http://public-ip:80
+
+ex: create our own html file.
+/usr/share/nginx/html #vim devops.html
+<h1>Hello I am learning DevSecops with aws</h1>
+
+Goto browser Public-ip/devops.html
+open our own index.html file
+
+You can access the Nginx web server. 
+The web server content is located at /usr/share/nginx/html/index.html."
+
+we didn't give the customer this type of access like pub-ip:port
+
+we can goto Domains.
+================================================================================
+godaddy  --> Domain register
+hostinger --> cheapest domains for 1st year,for every renewel it's costly.
+====================================================================
+hostinger.com  --> login your mail-id.
+===========================================
+
+purchase domain.
+
+DNS- Domain name system
+
+DNS resolver is the component in ISP that is responsible to provide IP address.
+
+DNS resolver contacts Root servers.
+
+facebook.com  --> TLD .com is TLD(Top level Domain)
+kimidi.site  --> TLD is .site
+
+.in, .io, .org, .net, .edu, .gov, .co,.ai, .shop, .online ....etc
+
+Goto kimidi.site domain and click on manage -> click on DNS/Nameservers.
+give the pub-ip to the domain.
+
+manage DNS records -> type A -> points-> copy pub-ip --> TTL -60 Add record.
+
+Types of Records:
+
+A -> IP Address
+CNAM -> Points to another Domain
+MX  --> Mail Records
+TXT  --> Domain Verification
+NS --> who is the managing this domain now.
+
+domain registar responsibility to update the details to TLD.
+
+compare to hostinger aws is easily update the domains & records.
+why because using route53 and all the server IPS and infra are in AWS.
+
+you are purchase domains on AWS also but it's cost is very high.
+
+Goto Route53 --> hostedzone  --> create hostedzone --> Doamin-name kimidi.site--> 
+select public hosted zone --> create hosted zone
+
+NS record means -> name server record. its shows who is managing this domains.like ns-records.
+
+
+
+
+
+4 name server records created.
+
+Goto hostinger --> click on DNS/Nameservers --> select change name servers
+
+paste the 4 NS records. (why multiple NS. in case one fail othe one can manage NS)
+
+goto aws- route53-hosted zones- kimidi.site -> create record--> simple routing
+--> record type --> type A --> value- public-ip -> TTL - 1m 
+
+name servers can provide the IP address.

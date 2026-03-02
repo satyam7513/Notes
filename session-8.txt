@@ -1,0 +1,236 @@
+google.com --> browser cache --> OS --> OS Cache --> ISP DNS resolver --> root servers --> TLD info --> .com TLD --> name servers -->
+ A record
+
+name servers --> who are managing that domain now
+domain registar --> a mediator to sell the domain, they have default name servers
+
+create hosted zone in AWS, get the NS records and update in domain provider
+TTL --> time to live is DNS cache before issuing next DNS request
+
+mobxtream download -> home Edition.-> multi tabs purpose we are using.
+
+
+frontend: nginx installation:
+==============================================
+create 3 instances: frontend, mongodb, catalogue.
+
+sudo set-prompt frontend --> show the particular name in cmd mode.
+==========================
+sudo su -
+
+frontend--> dnf module disable nginx -y
+dnf module enable nginx -y
+dnf install nginx -y
+
+systemctl enable nginx
+systemctl start nginx
+
+remove the default content
+rm -rf /usr/share/nginx/html/*
+
+curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip
+
+extract the code 
+
+cd /usr/share/nginx/html
+unzip /tmp/frontend.zip
+
+vim /etc/nginx/nginx.conf --> copy the default content.
+
+resart the nginx:
+systemctl restart nginx
+
+
+
+
+
+MONGODB:
+=====================================================================================
+GO TO mongodb instance:
+mysql/oracle/postgress/mssql --> RDBMS (Relational database management system)
+tables & cloumns. primary and foreign keys.
+
+Mongodb --> NOSQL  --> Documents
+
+  ex: {
+      "name": satyam
+	  "email": ksnaidudba@gmail.com
+  }
+  
+ 
+ 
+ vim /etc/yum.repos.d/mongo.repo
+
+ copy and paste the mongoDB repo file
+ 
+[mongodb-org-7.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/9/mongodb-org/7.0/x86_64/
+enabled=1
+gpgcheck=0
+
+dnf install mongodb-org -y
+
+systemctl enable mongod
+systemctl start mongod
+netstat -lntp -> port no:27017-mongodb
+
+127.0.0.1:27017 --> (Local host)only local server can be accessed.
+we can change the access.
+vim /etc/mongod.conf -> we can change the configuration.
+127.0.0.1 -> 0.0.0.0
+
+systemctl restart mongod
+
+
+
+
+
+
+03: CATALOGUE:
+===================================================================================================================================
+catalogue is developed by using Nodejs, so we can install Nodejs.
+
+dnf module list nodejs --> check the present version
+
+dnf module disable nodejs -y --> disable current module
+dnf module enable nodejs:20 -y --> enable particular version
+dnf install nodejs -y
+
+ps -ef | grep nginx  -> check which user is running nginx-> nginx user is running
+ps -ef | grep mongo --> mongod user is running monogdb. its automaticaly created the users when we are configuring and installed.
+
+root user or some users run's the process is not safe. only system user can run this process.
+system user/ service user-Non human users which will not have login, intened to run appllications.
+
+system user is a special type of user account created by the operating system or installed services. 
+These users are mainly used to run system services, daemons, or background processes, not for human login.
+
+now we want to create user. 
+
+nginx, mongodb install like that catalogueouge install not possible.
+
+cat /etc/passwd | grep nginx --> user information
+nginx:x:991:nginx web server:/var/lib/nginx:/sbin/nologin --> system users can't login
+
+cat /etc/shadow --> show the system user passwords
+nginx: no password means system accounts no password.
+
+we can create roboshop user -- home /app --shell /sbin/nologin 
+useradd --system --home /app /sbin/nologin--shell--comment "roboshop system user" roboshop
+
+cat /etc/passwd | grep roboshop -> check systemuser created or not with nologin.
+
+mkdir /app
+
+curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
+
+cd app/
+unzip /tmp/catalogue.zip
+ls -l
+
+db
+package.json
+server.js
+
+java/Nodejs/python every language has one extention.
+
+java script --> .js
+java --> .java
+pyhton --> .pyhton
+go --> .go
+Nodejs --> .js ,.cjs
+
+server.js means its a java based script.
+
+every programming have dependencies or libraries.
+build tool --> compile means syntax check and download the dependencies and ready to run the application.
+
+nodejs --> npm (node package manager)
+build.file --> package.json (Developers develop this code and libraries)
+
+cd /app
+npm install --> search for package.json in the current directory and install all dependencies.
+
+it's not only Nodejs any programming language follow this one.
+
+this application is installed manually so systemctl is not working in nodejs.
+so we need to create systemctl file.-> starting stopping, reestart,enable,disable easy.
+
+we have some configurations
+/etc/systemd/system  --> create .service file, catalogue.service file
+
+vi /etc/systemd/system/catalogue.service
+
+paste the code in through doc.
+
+give the mongodb -private-ip (why private -ip all the databases, services all are in one place)
+but we don't give any ip. give domain name.
+
+create DNS record --> Route53--> hosted zone --> kimidi.site--> create record
+simple routing --> define simple record -> mongodb.kimidi.sie --> A routes traffic
+--> value/root (private-ip) --> TTL-1 -define simple record.
+
+This record (Mongodb.kimidi.site) is updated or not, how to check?
+
+nslookup mongodb.kimidi.site
+
+vi /etc/systemd/system/catalogue.service
+you can change replace in mongodbURL  place //mongodb.kimidi.site:27017/catalogue
+
+systemctl daemon-reload --> any configuration changes you must reload the daemon.
+
+systemctl enable catalogue
+
+systemctl start catalogue
+
+systemctl status catalogue
+
+you must install mongo-client for load the products.
+
+goto mongo repo (its in catalouge server )
+
+
+/app # vim /etc/yum.repos.d/mongo.repo
+
+copy the client-software code
+
+dnf install mongodb-mongosh -y
+
+load master data :
+mongosh --host MONGODB-SERVER-IPADDRESS </app/db/master-data.js
+
+mongosh --host mongodb.kimidi.site </app/db/master-data.js
+
+we need inform the catalogue information to frontend also.
+
+let us create one record for catalogue.
+goto Route53--hostedzones->kimid.site --> create record --> simple record
+catalogue.kimidi.site --> A routes --> private-ip --> TTL -1 -> define simple record.
+
+Goto frontend server
+#vim /etc/nginx/nginx.conf
+
+catalogue location change:
+{ proxy_pass http://catalogue.kimidi.site:8080/; }
+
+sytemctl restart nginx
+
+log files in nginx:
+
+/var/log/nginx/access.log
+/var/log/nginx/error.log
+
+
+
+
+
+
+
+
+
+
+
+
+
+

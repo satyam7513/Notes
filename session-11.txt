@@ -1,0 +1,152 @@
+mongodb
+catalogue
+frontend
+
+redis
+user
+cart
+
+mysql
+shipping
+
+rabbitmq
+payment
+dispatch
+
+
+HTTP Methods --> GET, POST, PUT, DELETE, OPTIONS
+
+http://kimidi.site/user and method GET --> getUser  --> readuser
+http://kimidi.site/user and method POST --> CreateUser
+http://kimidi.site/user and method PUT --> updateUser
+http://kimidi.site/user and method DELETE --> deleteUser
+
+backend apps always do CRUD operations on DB
+
+/var/log/nginx/access.log, /error.log
+/var/log/messages --> backend logs stored this folder.
+
+SHipping & MY SQL:
+=====================
+My sql Goto through documentation and install it.
+
+Goto shipping Document:
+
+shipping is used java application.
+source code is .java
+build tool--> maven
+build file --> pom.xml
+
+group id,        artifact id,                        version.
+
+com.hdfc    banking.savings.smsbanking                1.0
+
+java source code is -> .java extension
+
+java code first you can do it compile --> run bytecode/compile code means system understand the language.
+
+dnf install maven -y
+
+you can install maven java also installed. (java --version & mvn --version)
+
+useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+
+mkdir /app 
+
+curl -L -o /tmp/shipping.zip https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip 
+cd /app 
+unzip /tmp/shipping.zip
+
+mvn clean package --> clean previous installs and do the fresh packaging
+
+ls -l
+db  pom.xml   src
+
+mvn clean package -> run agian once its downlaod all dependencies.
+
+ls -l
+
+db pom.xml src  target
+
+cd target 
+ls -l
+
+see the shipping-1.0.jar --> this is the java application (it's a byte code)
+
+mvn clean -> again run the target folder is deleted.
+
+mvn compile --> show the build success.
+
+cd /app --> ls -l
+db pom.xml src target
+
+cd target/
+ls -l
+classes genrated-spurces maven-status
+
+cd calsses --> ls -l
+cd com --> ls
+cd instana --> ls
+cd roboshop --> ls
+cd shipping -->ls --> all .class files showing this is bytecode.
+cat carthelper.class --> its not understand the code.
+.jar --> packaging in java(bytecode)
+
+.java --> java source file extension
+.class --> java bytecode extension
+
+
+mvn compile --> compile the java source code and create bytecode in .class format in target folder
+mvn package --> pack the java class files into single file called shipping-<version>.jar
+
+maven life cycle --> clean compile test and package
+package == compile+test+package
+
+mvn clean package -> in mvaen clean package compile also running, test cases also
+
+The developer give the version number in pom.xml file
+cat pom.xml --> see the group-id, artifact-id,version.
+
+mv target/shipping-1.0.jar shipping.jar 
+ls -l
+
+vim /etc/systemd/system/shipping.service
+copy the code and paste it. it's depends on cart & my-sql server.
+
+systemctl daemon-reload
+systemctl enable shipping 
+######systemctl start shipping (shipping is not started because mysql database configuration is required.)
+
+less /var/log/messages --> see the error logs, incase any erros came.
+
+
+
+dnf install mysql -y 
+mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pRoboShop@1 < /app/db/schema.sql
+
+cat /app/db/schema.sql --> see the databse information.
+
+mysql -h mysql.kimidi.site -uroot -pRoboShop@1 < /app/db/schema.sql
+
+mysql -h mysql.kimidi.site -uroot -pRoboShop@1 < /app/db/app-user.sql 
+
+mysql -h mysql.kimidi.site -uroot -pRoboShop@1 < /app/db/master-data.sql
+
+
+systemctl restart shipping
+
+netstat -lntp --> 8080-port number
+
+less var/log/messages  --> shipping appliction started.
+
+GOTO frontend -Nginx change the proxy: vi /etc/nginx/nginx.conf
+
+http://shipping.kimidi.site:8080/; }
+
+systemctl restart nginx
+
+
+python
+file extension --> .py
+build tool --> pip
+build file --> requirements.txt

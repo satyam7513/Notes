@@ -1,0 +1,162 @@
+awk command explained :
+======================
+
+original developers at Bell Labs: Alfred Aho, Peter Weinberger, and Brian Kernighan. 
+awk is a powerful Linux command used to read text line by line, split it into columns, and perform actions on it.
+
+Example file:
+===========
+
+Let’s say you have a file employees.txt:
+
+101 John IT 50000
+102 Alice HR 45000
+103 Bob IT 55000
+104 Mary Finance 60000
+
+print Entire file:
+awk '{print}' employees.txt
+
+Print specific columns: Print name and salary
+awk '{print $2, $4}' employees.txt
+
+Print with condition (filtering) : Print only IT department employees
+awk '$3=="IT" {print $2, $4}' employee.txt
+
+Print lines with salary > 50000
+awk '$4 > 50000 {print $2, $4}' employee.txt
+
+Using awk with command output:
+Example: df -h
+df -h | awk '{print $1, $5}'
+
+
+Example:2
+=========
+Sample log file (app.log)
+
+2024-01-10 10:01:12 INFO  User login success user=john ip=10.10.1.5
+2024-01-10 10:02:45 ERROR DB connection failed user=alice ip=10.10.1.6
+2024-01-10 10:03:10 WARN  Disk usage high ip=10.10.1.7
+2024-01-10 10:04:55 ERROR Timeout occurred user=bob ip=10.10.1.8
+
+1.Extract only ERROR logs:
+awk '$3=="ERROR" {print}' app.log
+
+2.Print timestamp + error message:
+awk '$3=="ERROR" {print $1, $2, $4, $5, $6}' app.log
+
+3.Extract username from ERROR logs:
+awk '$3=="ERROR" {print $7}' app.log
+
+4.Extract IP addresses from logs:
+awk '{print $NF}' app.log
+
+5.Only ERROR IPs:
+awk '$3=="ERROR" {print $NF}' app.log
+
+6.Count number of ERRORs:
+awk '$3=="ERROR" {count++} END {print "Total Errors:", count}' app.log
+
+
+
+How do you check running log files:
+log files --> tail -f <log-file>
+
+find <where to search> -name <file-name>
+find / -name "users"
+find . -name "users"
+
+ssh -i daws-84s ec2-user@ip
+
+vim --> visually improved--> file editing means edit the text is very easy like comapre to cat.
+
+vim <file-name>
+
+
+Draw the Daigram: 3 boxes:
+3 MODEs
+Esc, Colon, insert MODEs
+
+esc mode to command mode press the Esc
+esc mode to insert mode  press the i and enter the text.
+
+vim devops.txt
+
+
+command MODE
+==============
+:q -> quit the file
+:wq --> write and quit
+:wq! --> force write and quit
+:q! --> exit without saving
+:/<word-search> --> search for the word from top
+:?<word-search> --> search for the word from bottom
+:noh --> no highlight
+:27 d --> delete 27th line
+:%d --> total content will be deleted
+:3s/sbin/SBIN --> in 3rd line first occurence of sbin will be replaced with SBIN
+:3s/sbin/SBIN/g --> all occurence in that line
+:%s/sbin/SBIN/g --> all occurences in the file
+
+
+Esc Mode
+===============
+u --> undo (In windows ctrl+z type)
+yy --> copy the line where you are
+p --> paste
+dd --> cut the line
+gg --> takes to top of the file
+shift+g --> takes us to bottom of the file
+
+
+Linux Administration
+=====================
+User management: create user, add the group to user and delete the user like that.
+================
+
+CRUD
+useradd <user-name> --> create user
+useradd suresh
+
+id <user-name> --> displays the user info.
+id suresh
+
+group --> list of similar users
+devops team have 20 members
+create devops group, add team members to the group.
+
+in linux when you create user, by default group also will be created with same name..
+
+primary group and secondary group
+
+1 primary group, atleast one secondary group
+
+cat /etc/passwd --> see the suresh user information.
+cat /etc/group  --> see the group information.
+
+groupadd devops --> devops group will be created
+
+usermod -g devops suresh -->  suresh is added into devops groups.
+Sometimes suresh need to work with another team like testers, so we can add suresh on secendoery group.
+
+group add testers
+
+usermod -aG testers suresh
+id suresh -> check the groups.
+
+g- means its primary group
+G- means it's secondery group.
+
+userdel suresh --> its deleted on user suresh but still it's exist on group.
+cat /etc/group --> check suresh group is exist .
+groupdel suresh  --> group also deleted.
+
+
+gpasswd -d suresh devops --> removing user suresh from group devops.
+userdel suresh --> delete the suresh user.
+
+
+passwd <user-name>
+passwd suresh --> create the password on suresh.
+

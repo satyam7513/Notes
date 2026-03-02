@@ -1,0 +1,151 @@
+AMIDetails Name: Redhat-9-DevOps-Practice
+
+AMI-ID: ami-0220d79f3f480ecf5  password: DevOps321
+
+ ssh -i daws-84s ec2-user@54.163.19.138
+
+process management
+=====================
+TM --> TL --> TM --> Senior --> Junior --> Frehser
+
+TM --> 5 tasks for 5 TL
+
+ls -l --> it creates a process and assign a process ID, executes the command in kernel --> get the o/p --> display on screen
+
+ps -> shows running process recent.
+
+ps -ef --> show all the process.
+
+UID          PID    PPID  C STIME TTY          TIME CMD
+root           1       0  0 15:36 ?        00:00:01 /usr/lib/systemd/systemd --s
+root           2       0  0 15:36 ?        00:00:00 [kthreadd]
+root           3       2  0 15:36 ?        00:00:00 [rcu_gp]
+root           4       2  0 15:36 ?        00:00:00 [rcu_par_gp]
+root           5       2  0 15:36 ?        00:00:00 [slub_flushwq]
+root           6       2  0 15:36 ?        00:00:00 [netns]
+root           8       2  0 15:36 ?        00:00:00 [kworker/0:0H-events_highpri
+root          10       2  0 15:36 ?        00:00:00 [mm_percpu_wq]
+root          11       2  0 15:36 ?        00:00:00 [rcu_tasks_kthread]
+root          12       2  0 15:36 ?        00:00:00 [rcu_tasks_rude_kthread]
+root          13       2  0 15:36 ?        00:00:00 [rcu_tasks_trace_kthread]
+root          14       2  0 15:36 ?        00:00:00 [ksoftirqd/0]
+root          15       2  0 15:36 ?        00:00:00 [rcu_preempt]
+root          16       2  0 15:36 ?        00:00:00 [migration/0]
+
+
+ps -ef | grep <process-name>
+ps -ef | grep nginx --> check the nginx process.
+
+one process is not responding properly in linux we use kill command.
+
+kill PID --> request to terminate
+
+kill -9 pid -> forcefully killed the process-id.
+
+sleep 10
+sleep 10
+ps -ef | grep sleep 
+check the pid and kill it.
+
+where we can use these commands:
+
+IN linux server application is not running than we can trouble shoot the 
+application using this commands:
+
+1.systemctl status nginx
+2. ps -ef | grep nginx
+3.Top -->its shows particular pid takes howmuch cpu usage and RAM taken.
+4.htop (human radable top) also we are using. :
+sudo yum install htop -y
+
+ 
+ ex: Scenario:
+
+    MongoDB replication slow in production.
+	 engineer checks htop
+      finds: 
+	         One secondary node CPU overloaded
+             Backup job running simultaneously
+			 
+		taken Action: Reschedule backup
+                      Optimize replication	 
+					 
+top and htop are used for real-time system monitoring.
+we use them to identify high CPU or memory consuming processes, 
+monitor application performance, troubleshoot server slowness, and manage processes during deployments and production incidents.
+
+
+
+for example in our application 
+10 users login at a time its takes 0.1% cpu 0.1% RAM
+200 users login at a time it's takes 10% cpu, 20% RAM. on that time cpu and ram is increased.
+
+process reached on high, some resources didn't release application.
+
+we can check top -p PID --> check the resources used by particular process.
+we can check and restart the process or kill the PID.
+
+
+Network management:
+==================
+Previously we are using on-premises servers,
+(An on-premises server (or on-prem server) means a server that is physically located and maintained inside an organization’s own premises) 
+so we can give the ethernet connection and establish the connection to the laptop/desktop.
+
+Now we are using aws cloud -servers, so the network part take care of Aws only.
+(we will discuss on Aws part like vpc,subnet,IGW,NAT,Route53,cidr ranage )
+
+check the port numbers:
+netstat -lntp 
+
+check whether the particular applcation (service) running properly or not:
+
+1.systemctl status <service-name>
+2.ps -ef | grep service-name
+3.netstat -lntp
+4.top -p PID
+
+project: 3-tier architecture:
+==============================
+
+desktop application VS web application . 
+
+Resources usage more
+hanging
+manually-installation
+upgrade
+storage
+compatibiltiy issues
+No data security/backup
+can't access everywhere.
+
+If you can work on any project, architecture is very important.
+
+
+
+road side breakfast shop
+==========================
+single person --> less than 10
+
+taking order, cooking the item, serving, payment collection
+
+hotel
+=====================
+cook --> prepares the item
+owner --> counter --> issuing tokens
+
+let's say 20 members
+
+100 members 
+
+restaurant
+=====================
+captain --> welcomes the customer
+waiter --> takes the order
+chef --> prepares the order
+waiter --> garnish with cabbage, onion, lemon, keera, etc.
+
+directly to chef
+==================
+1. security
+2. queue management --> reduces taste of item

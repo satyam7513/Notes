@@ -1,0 +1,53 @@
+MQ DATABASE:
+============
+synchronus and Asynchronous 
+
+sync vs async
+
+http://kimidi.site 
+
+request sent --> waits for 1 miniute -> if no response shows error.
+http expects immediate response. this is called synchronus.
+
+for example we take whatsup. take 2 mobiles.
+1 is sender and other is reciever.
+sender is sending message but reciver is not in online.
+so the message is stored in MQ, so when the reciver come to online the message is recived.
+maximum some limited period is there(for example-30 days MQ is hold the whatsup messages).
+This is called Asynchronous .
+
+Asynchronous communication :
+==========================
+2 types
+1.poin to point --> message will be deliverd to single sysytem.
+2.topic and subscribe --> message will be delivered to all subscribers.
+   ex: when i upload vedio, all my youtube subscribers get notifications.
+   
+   MQ have Different flavours:
+   ACtiveMQ
+   RabbitMQ
+   IBMMQ
+   Kafka
+   
+   for example amzon follows some delivery partners, so like that
+   roboshop and we have a vendor to deliver our orders.
+   we get 1000's of messages from our delivery partners.
+   so we get our quee, so one by one updated after, so async communication is there.
+   
+
+
+RabbitMQ setup:
+==============
+first we can add Repo:
+vim /etc/yum.repos.d/rabbitmq.repo (This path is not mentioned in Doc.)
+
+copy the code and paste it.
+
+install rabbit mq server
+
+systemctl enable rabbitmq server
+
+rabbitmq add user -> creat user
+
+netstat -lntp --> 5672 is the rabbitmq port.
+

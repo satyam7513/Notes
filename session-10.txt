@@ -1,0 +1,119 @@
+user can depend on Mongdb & redis databases.
+
+we need to create 3 servers. redis, user, cart.
+                             ===================
+
+Redis-DB --> in memory database.(Redis-DB stores data in RAM)
+
+HD(ROM) --> RAM --> Apps 
+
+how to data transfer from request to DB:
+
+Send a connection req to DB
+Connection establish
+Run a query against DB
+DB should fetch the data from HD
+Send response to app
+Close the connection
+
+App --> Cache
+App --> Cache --> DB --> Cache (In this situation cache is act like redis)
+
+create 3 records also: 
+redis.kimidi.site
+user.kimidi.site
+cart.kimidi.site
+
+redis-Db installation:
+==========================
+dnf module disable redis -y
+dnf module enable redis:7 -y
+dnf install redis -y 
+
+vim /etc/redis/redis.conf
+
+Update listen address from 127.0.0.1 to 0.0.0.0 in /etc/redis/redis.conf
+Update protected-mode from yes to no in /etc/redis/redis.conf
+
+systemctl enable redis 
+systemctl start redis 
+
+netstat -lntp : 6379 -redis port no
+
+User-component:
+================
+This one also Node-js. same process follow previously.
+
+dnf module list
+dnf module disable nodejs -y
+dnf module enable nodejs:20 -y
+
+dnf install nodejs -y
+
+useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+
+mkdir /app 
+
+curl -L -o /tmp/user.zip https://roboshop-artifacts.s3.amazonaws.com/user-v3.zip 
+cd /app 
+unzip /tmp/user.zip
+
+npm install 
+
+vim /etc/systemd/system/user.service
+
+copy the code and paste it through document.
+change the Redis-ip & mongodb-ip:
+Redis.kimidi.site
+mongodb.kimidi.site
+
+systemctl daemon-reload
+
+systemctl enable user 
+systemctl start user
+
+telnet redis.kimidi.site 6379
+telnet mongodb.kimidi.site 27017
+
+GOTO Frontend server vi /etc/nginx/nginx.conf update the user 
+proxy_pass http://user.kimidi.site:8080/; }
+systemctl restart nginx
+
+
+CART: it's depend on Redis & catalogue.
+=======================================
+dnf module disable nodejs -y
+dnf module enable nodejs:20 -y
+
+dnf install nodejs -y
+
+useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+
+mkdir /app 
+
+curl -L -o /tmp/cart.zip https://roboshop-artifacts.s3.amazonaws.com/cart-v3.zip
+cd /app 
+unzip /tmp/cart.zip
+
+npm install 
+
+vim /etc/systemd/system/cart.service
+REDIS_HOST=redis.kimidi.site
+CATALOGUE_HOST=catalogue.kimidi.site
+
+systemctl daemon-reload
+
+systemctl enable cart 
+systemctl start cart
+
+netstat -lntp
+cart.kimidi.site enable in frontend 
+restart frontend
+
+check the cart and add the products.
+
+
+
+
+
+

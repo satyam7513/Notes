@@ -1,0 +1,187 @@
+ssh-keygen -f daws-84s
+ssh -i <private-key> ec2-user@ip address.
+
+
+
+
+
+Install gitbash on windows laptop
+create one folder- devops/daws-84s
+ssh-keygen -f daws-84s
+
+you see the 2 keys, one is publc key and private key.
+
+public key means it's like -lock
+private key means it's like- key.
+
+open the public key and copy the key.
+
+after login the aws account and import the public-key.
+
+goto key pairs and import the key.keypair name-daws84s
+paste the public-key code and click on import key pair.
+
+first create the (firewall or security group)- 
+allow-all
+inbound rules- all traffic- anywhere ipv4 - 0.0.0.0/0
+outbound rules- don't do anything.
+
+key pair created and firewall created.
+
+now we launch to the aws ec2 server.
+
+explain the types of instances like t2 micro/t3 micro like that.
+
+Ip address, ssh protocol,port-number 22, user-ec2 user, private-key.
+
+goto GItbash
+
+ssh -i <private-key> ec2-user@ip address.
+
+we can create the server and connect it.
+
+
+/home/ec2-user --> linux home directory
+/c/users/satya --> windows home directory
+
+cd --> change directory
+
+cd .. --> one step back
+
+ls --> list subdirectories.
+
+ssh -i daws-84s ec2-user@54.82.226.212 --- relative path
+
+ssh -i /c/devops/daws-84s/daws-84s ec2-user@54.82.226.212 -- absolute path.
+
+$-- normal user - less permissions.
+sudo su - --> # means super user /Root user/admin access.
+/root --> root user home directory.
+
+
+cd / --> root directory.
+ls --> it's shows linux directory structure. - later we discuss about this structure.
+
+ls -l --> long listing format in alphabetcal order.
+ls -lr --> Long listing format in reverse alphabetical order.
+ls -lt --> latest files on top
+ls -ltr --> latest at bottom
+ls -la --> all files including hidden files and folders.
+ls -ltrh  --> give the output in human readble like bites,kbs format.
+
+ls -la
+drwx - d denotes directory
+-rwx -> - denotes file
+
+
+touch <file-name> --> creates one empty file.
+ex: touch devops,.txt
+
+cat > <file-name> - usally called as redirection.
+Type text,enter and ctrl+d
+
+ex: cat > devops.txt
+hello i am learning Dev secops with AWS.
+
+cat >> <file-name> --> Appends text to previous content.
+
+
+mkdir <name> --> creates directory
+rmdir --> remove empty directory
+rm -f --> forcefully removes file
+rm -rf --> recursively forcefully delete the files and folders inside too.
+
+
+If you validate it or operate.
+CRUD --> create read update delete.
+for example craet aws account, create operation, enter the user name& pwd - read the operation, 
+update the passwords its update operation and delet the user using delete operation
+
+cp <source> <destination> --> copy files/folders
+mv <source> <destination> --> cut and paste (Move and rename purpose using same command)
+
+wget <URL> --> downloads the file
+using github and download the raw code in wget.
+
+curl <URL> --> shows on the screen
+
+
+cat <file-name> | grep <word-to-search> --> search the file exist or not using this | symbol.
+Ex: cat 01-playbook.yml | grep -i ping
+
+grep <word-to-search> <file> - same on the above search the file name or word.
+
+
+awk command explained :
+======================
+
+awk is a powerful Linux command used to read text line by line, split it into columns, and perform actions on it.
+
+Example file:
+===========
+
+Let’s say you have a file employees.txt:
+
+101 John IT 50000
+102 Alice HR 45000
+103 Bob IT 55000
+104 Mary Finance 60000
+
+print Entire file:
+awk '{print}' employees.txt
+
+Print specific columns: Print name and salary
+awk '{print $2, $4}' employees.txt
+
+Print with condition (filtering) : Print only IT department employees
+awk '$3=="IT" {print $2, $4}' employees.txt
+
+Print lines with salary > 50000
+awk '$4 > 50000 {print $2, $4}' employees.txt
+
+Using awk with command output:
+Example: df -h
+df -h | awk '{print $1, $5}'
+
+
+Example:2
+=========
+Sample log file (app.log)
+
+2024-01-10 10:01:12 INFO  User login success user=john ip=10.10.1.5
+2024-01-10 10:02:45 ERROR DB connection failed user=alice ip=10.10.1.6
+2024-01-10 10:03:10 WARN  Disk usage high ip=10.10.1.7
+2024-01-10 10:04:55 ERROR Timeout occurred user=bob ip=10.10.1.8
+
+1.Extract only ERROR logs:
+awk '$3=="ERROR" {print}' app.log
+
+2.Print timestamp + error message:
+awk '$3=="ERROR" {print $1, $2, $4, $5, $6}' app.log
+
+3.Extract username from ERROR logs:
+awk '$3=="ERROR" {print $7}' app.log
+
+4.Extract IP addresses from logs:
+awk '{print $NF}' app.log
+
+5.Only ERROR IPs:
+awk '$3=="ERROR" {print $NF}' app.log
+
+6.Count number of ERRORs:
+awk '$3=="ERROR" {count++} END {print "Total Errors:", count}' app.log
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

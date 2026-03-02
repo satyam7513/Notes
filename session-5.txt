@@ -1,0 +1,316 @@
+Ssh –I private-key ec2-user@ipaddress
+
+somarajuvinodkumar@gmail.com
+Vinod@7538
+
+Session-5:
+==============
+Permissions:
+R  4
+W  2
+X  1
+
+-	 Rw- 	  r--   		r—
+File/        user     group 	       others
+Directory 
+Touch devops.txt
+Ls –l  - check the file permissions.
+
+
+User 		group  		others
+Chmod  ugo+w   devops.txt   give write access.
+Chmod  o-w  devops.txt  revoke the write access.
+Chmod ugo+rwx devops.txt   give all the permissions at a time.(full access)
+
+Chmod 700 devops.txt  give the only user for full permissions.
+Only owner and root user can change the file permissions.
+
+Change ownership:
+================
+Chown <user>:<group> devops.txt
+
+Ex: create a aws.txt file under/tmp directory. We can give others access to this file.
+
+Sudo useradd suresh
+Sudo Chown suresh aws.txt  
+ only root user can change the file-ownership
+
+How many ports is available: 0-65536 
+port is like flat number
+
+ssh service path: /etc/ssh/sshd_config
+
+
+check with public key in .ssh/authorized_keys
+cat authorized_keys -- see the public-key.
+
+in .ssh we can check the sshd service status:
+systemctl status sshd
+
+
+
+how can you give key based access to linux user?
+=================================================
+
+1. create user
+2. suresh can send his public key to admin user
+3. /home/suresh admin creates .ssh in /home/suresh folder
+4. suresh is the only owner to this folder... 700
+5. create a file called authorized_keys with max access 600
+6. admin keeps suresh public key here.
+7. now suresh should be able to login
+
+
+
+1. create user:  
+
+sudo su -> goto root user.
+
+useradd suresh
+
+usermod -aG wheel suresh
+
+id suresh  
+
+
+cd ../suresh/
+pwd -> /home/suresh
+
+create a .ssh directory
+mkdir .ssh
+chmod 700 -R .ssh/ (R means recursive mode, the permissions given into the subfolders/files also)
+
+ls -la - check the permission.
+
+cd .ssh/
+touch authorized_keys
+ls -l
+
+
+2.suresh can send his public key to admin user
+
+we take another session c:/devops/daws-84s.
+
+ssh-keygen -f suresh
+
+we can see 2 keys -> suresh, suresh.pub
+
+cat suresh.pub --> copy the public key.
+
+Goto previous session, where you can create authorized_keys than paste the public-key
+
+vim authorized_keys -> paste the public key.
+cat authorized_keys --> check key is copied or not.
+ls -l
+
+chmod 600 authorized_keys
+
+ls -l
+
+currently you are in .ssh/ , now one step back and change the owner ship permission.
+
+cd ..
+ls -la
+
+chown suresh:suresh -R .ssh/
+
+ls -lassh
+
+cd .ssh/
+ls -la
+
+ssh -i suresh suresh@publicip --> now suresh should be able to login
+
+
+
+
+/etc/sudoers --> you can do changes to provide root access (or)  add user to wheel group without password
+%wheel         ALL=(ALL)	NOPASSWD:ALL
+Shivakumar   ALL=(ALL)	NOPASSWD:ALL   - we can do change like this for root access for the particular user.
+
+ 
+
+
+
+package management
+====================
+What is Package Management?
+
+👉 Package management is a system used in Linux to:
+
+Install software
+
+Update software
+
+Remove software
+
+Manage dependencies (required libraries/files)
+
+Maintain software repositories
+
+📌 Instead of downloading software manually, Linux uses package managers.
+
+(package manager connects to internet windows website. downloads them and install them)
+
+Types of Linux Package Managers:
+
+
+Linux distributions use different package systems:
+
+Distribution	             Package Manager	                        Package Format
+Ubuntu / Debian	             APT (apt, apt-get)                     	  .deb
+RHEL / CentOS / Fedora	      YUM / DNF	                                  .rpm
+
+
+if you want install any package must use root access.
+
+dnf install <package name>
+dnf install git
+
+sudo apt install package_name
+sudo apt install nginx
+
+sudo apt remove package_name --> Removes package but keeps config files.
+sudo apt purge package_name  --> Removes package + configuration files.
+
+apt search package_name -> search package
+apt show package_name --> show package details.
+
+
+dnf remove –y <package-name>  –> remove the package
+
+/etc/yum.repos.d  -->  repos available in that location
+
+dnf list installed -->  shows the installed packages list
+
+dnf list available --> shows the available packages
+
+dnf list avaialible | grep python  --> shows the python packages.
+
+
+
+
+service management
+===================
+What is Service Management?
+
+👉 Service management in Linux is used to:
+
+Start a service, Stop a service, Restart a service, Enable service at boot, Disable service at boot, Check service status
+
+📌 Services = background processes (daemons)
+
+Examples: sshd, nginx, httpd, postgresql, docker.
+
+Service Management Systems in Linux: 
+
+systemd	    -->    RHEL 7+, CentOS 7+, Ubuntu 16+, Fedora
+
+systemctl is used to manage services in systemd.
+
+systemctl <action> <service_name>
+
+
+systemctl start <service-name>
+systemctl stop <service-name>
+systemctl status <service-name>
+systemctl restart <service-name>
+systemctl enable <service-name>
+systemctl disable <service-name>
+
+install nginx and start it : dnf install nginx -y
+
+Nginx port number-80
+
+service files availible in :
+ /usr/lib/systemd/system/
+/etc/systemd/system/
+
+
+
+
+1.Difference between start and enable:
+
+Starts the service immediately
+
+Service runs only for the current session
+
+Enables the service to start automatically at boot
+
+Does not start the service immediately
+
+one-liner:
+👉 start controls runtime, enable controls boot time
+
+2.What is systemd?
+
+systemd is that  manages services and system startup
+
+3.Where are service files stored?
+
+ /usr/lib/systemd/system/   → Default system services
+/etc/systemd/system/       → Custom or overridden services
+
+4.How do you troubleshoot a failed service?
+
+  1️ Check service status
+
+    systemctl status service_name
+	
+  2.Check service logs
+
+     journalctl -u service_name
+	 
+  3.Check config files
+
+     Syntax errors
+
+      Wrong paths
+
+     Port conflicts
+	 
+  4.check dependencies
+
+       systemctl list-dependencies service_name
+	   
+  5.Restart service
+
+       systemctl restart service_name
+	   
+one-liner:
+ I check status, logs, configuration, and dependencies using systemctl and journalctl.
+ 
+ 
+ 5.Difference between reload and restart?
+ 
+    systemctl reload nginx
+	
+  Reloads configuration files
+
+  Service keeps running - No down time.
+  
+  restart:
+  
+  systemctl restart nginx
+  
+  Stops and starts the service again
+
+  Causes brief downtime
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

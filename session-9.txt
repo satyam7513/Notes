@@ -1,0 +1,105 @@
+HTTP Status codes & errors:
+-------------------
+2XX --> Success
+4XX --> client side errors
+5XX --> server side errors
+1XX --> informational
+3XX --> redirectional
+
+
+configuring server        : Backend configuration on any server follows the below process.
+-------------------------
+Linux server creation
+programming language installation includes build tool
+create one dedicated directory for our application /app
+create one system user for our application roboshop
+download the code into our directory
+install dependencies
+create systemctl service
+if required load data
+start the service
+
+
+What is Forward Proxy?
+===========================
+
+A forward proxy sits between client (user) and internet servers.
+
+👉 Client sends request → Proxy → Internet server
+👉 Server response → Proxy → Client
+
+The server does NOT know the real client.
+
+
+Why Use Forward Proxy?
+
+Hide client identity (privacy)
+
+Restrict websites (company/school filtering)
+
+Cache data to improve speed
+
+Security monitoring
+
+
+Real Life Example:
+====================
+
+🏫 College / Office Network
+
+Students try to open websites
+
+All traffic goes through proxy server
+
+Admin can block YouTube, social media etc.
+
+
+
+What is Reverse Proxy?
+
+A reverse proxy sits between internet users and backend servers.
+
+👉 Client → Reverse Proxy → Backend Servers
+👉 Servers → Reverse Proxy → Client
+
+Client does NOT know actual server.
+
+
+Why Use Reverse Proxy?
+
+Load balancing
+
+Security protection
+
+SSL termination
+
+Hides internal servers
+
+Improves performance
+
+
+Real Life Example:
+===================
+
+🌐 Big Websites (Amazon, Netflix, Flipkart)
+
+Many backend servers exist
+
+Reverse proxy distributes traffic
+
+If one server fails → sends request to another
+
+👉 Example Tools:
+
+Nginx
+
+HAProxy
+
+Apache Reverse Proxy
+
+AWS Load Balancer.
+
+One Line Easy Memory Trick
+
+👉 Forward Proxy = Works for Client
+👉 Reverse Proxy = Works for Server

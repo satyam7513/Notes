@@ -1,0 +1,256 @@
+Special variables in shell
+============================
+we no need to define the variable, shell will provide to us.
+ex: $1
+
+if you want all variables passed to script: $@
+number of variables passed: $#
+script name: $0
+present working directory: $PWD (capital letters)
+home directory of the user who is running the script: $HOME
+which user is running the script: $USER
+PID of the current script: $$
+sleep 10 & --> goto background in 10 seconds
+PID of the last command running in background: $!
+
+
+we want run this specail variables in script.
+
+08-special-vars.sh
+============= === ======
+#!/bin/bash
+
+echo "All variables passed to the script: $@"
+echo "Number of variables: $#"
+
+we can pass the variables in sh command:
+sh 08-special-vars.sh devops aws azure
+o/p: Number of variables: 3
+
+
+
+echo "Script name: $0"
+echo "Current Directory: $PWD"
+echo "User running this script: $USER"
+echo "Home directory of user: $HOME"
+echo "PID of the script: $$"
+sleep 10 &
+echo "PID of last command in background: $!"
+
+ps -ef | grep sleep --> check the PID of the sleep process.
+
+
+CONDITIONS:
+===============
+ex: see the flow cahrt example in google.
+
+
+if(expression){
+	this block runs if expression is true
+}
+else{
+	this block runs if expression is false
+}
+
+
+
+if(raining){
+	take umbrella
+}
+else{
+	no need to take
+}
+
+
+Q.write a program if given number is less than 10 or not?
+
+       if (number < 10){
+	        print number is less than 10
+			}
+			
+		else{
+		      print number is not less than 10
+			}
+		fi
+		
+		
+		
+09.conditions.sh
+===== ====== ====
+
+#!/bin/bash
+
+NUMBER=$1
+
+# -gt --> greater than
+# -lt --> less than
+# -eq --> equal
+# -ne --> not equal
+
+if [ $NUMBER -lt 10 ]
+then
+    echo "Given number $NUMBER is less than 10"
+else
+    echo "Given number $NUMBER is not less than 10"
+fi
+
+
+
+using condtions install my sql:
+
+first you think who is installing like that:
+
+install mysql
+---------------
+1. user is running with root access or not.
+2. if root user proceed to install.
+3. else show the error that please run with root access.
+
+check with id -> id , root user id check with -> sudo id.
+
+you want only id --> id -u
+
+
+10.install-command.sh :
+===== ========  ========
+# Exit status codes 0-127 
+#success=0
+# other then 0 -> failure.
+
+# check already installed or not. if Installed $? is 0.
+# If not installed $? is not equal 0 (other than 0 any number).
+
+for example:  echo "hello-world"
+check the status- echo $? --> its shows 0 means its success.
+
+# ####how do you check the exit status code in shell scripting?  --> by checking the variable $? -> very imp in interviews.
+
+
+#!/bin/bash
+
+USERID=$(id -u)  -> id -u means UID of the current user,$-> stores command output in variable (Root user UID = 0) 
+
+if [ $USERID -ne 0 ]  --> (If the current user is NOT root)
+then
+    echo "ERROR:: Please run this script with root access"
+    exit 1 #give other than 0 upto 127 (exits script with status code 1)
+else
+    echo "You are running with root access"
+fi
+
+dnf list installed mysql
+
+
+if [ $? -ne 0 ]
+then
+    echo "MySQL is not installed... going to install it"
+    dnf install mysql -y
+    if [ $? -eq 0 ]
+    then
+        echo "Installing MySQL is ... SUCCESS"
+    else
+        echo "Installing MySQL is ... FAILURE"
+        exit 1 ### If installation fails:It stops the script immediately.
+    fi
+else
+    echo "MySQL is already installed...Nothing to do"
+fi
+
+
+
+			
+
+
+# FUNCTIONS:
+=== ===== =====
+a machine is functioning --> doing something
+
+example:
+=======
+coffee maker
+inputs: coffee beans, milk, water
+output: coffee
+
+function takes input and do some work, you can call whenever you require.
+
+function coffeeMaker(milk, coffee beans, water){
+	boilwater
+	crushbeans
+	mix milk, water and powder
+	return coffee
+}
+
+
+coffeeMaker(milk, coffee beans, water)
+
+repeated code you can keep it in function and call whenever you require
+
+ex: Install these 3 packages : mysql  python3 nginx
+
+you can provide args to function just like you do to the script
+
+sh install-command.sh mysql python3 nginx
+
+
+##### For Example:  Install these 3 packages : mysql  python3 nginx:
+=========== =============== ==========  ======================
+
+
+#!/bin/bash
+
+USERID=$(id -u)
+
+if [ $USERID -ne 0 ]
+then
+    echo "ERROR:: Please run this script with root access"
+    exit 1 #give other than 0 upto 127
+else
+    echo "You are running with root access"
+fi
+
+# validate functions takes input as exit status, what command they tried to install
+VALIDATE(){
+    if [ $1 -eq 0 ] --> ( $1 = $? (exit status of previous command):  $2 = "MySQL")
+    then
+        echo "Installing $2 is ... SUCCESS"
+    else
+        echo "Installing $2 is ... FAILURE"
+        exit 1  #If installation fails:It stops the script immediately.
+    fi
+}
+
+dnf list installed mysql  #Checks if mysql package is installed.
+if [ $? -ne 0 ]  #exit status of previous command not equal 0: If mysql is NOT installed (exit code not 0)
+then
+    echo "MySQL is not installed... going to install it"
+    dnf install mysql -y
+    VALIDATE $? "MySQL" #VALIDATE function prints result
+else
+    echo "MySQL is already installed...Nothing to do" # print already installed
+fi
+
+dnf list installed python3
+if [ $? -ne 0 ]
+then
+    echo "python3 is not installed... going to install it"
+    dnf install python3 -y
+    VALIDATE $? "python3"
+else
+    echo "python3 is already installed...Nothing to do"
+fi
+
+dnf list installed nginx
+if [ $? -ne 0 ]
+then
+    echo "nginx is not installed... going to install it"
+    dnf install nginx -y
+    VALIDATE $? "nginx"
+else
+    echo "nginx is already installed...Nothing to do"
+fi
+
+
+##### "This script checks whether MySQL, Python3, and Nginx are installed.
+If not installed, it installs them.
+After installation, it validates whether the installation was successful using a reusable function." #####
+

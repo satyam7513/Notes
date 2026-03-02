@@ -1,0 +1,310 @@
+softlink/symlink hardlink and inode
+
+shortcut(is also a file pointing real file) --> points to other real file
+if I delete real file, shortcut will break
+
+inode --> this is the metadata of the file
+
+symlink is like shortcut to original file.
+hardardlink is like a copy of file. it is like backup
+symlink and original file will have a diff inode. symlinks are used to point diff versions
+
+ln -s <original-file> <symlink-file>
+
+find / -name "*.conf"
+
+/etc/nginx/nginx.conf --> /etc/nginx-1.conf
+/etc/nginx/nginx.conf --> /etc/nginx-2.conf
+
+
+Symlink will have diff inodes, hardlinks will have same inode.
+if original file is deleted symlink will break. if original file deleted hard link will work.
+symlink is used to point diff versions, hardlink is used as backup to original file.
+symlink can be created to folders, we can't create hard link to folders.
+symlink will work with diff types of disks, hardlink can't be created for diff disks.
+
+
+🧱 Hard Link:
+   ==== ===== ==== ===
+ A hard link is another name (entry) for the same file data. Both original file and hard link share the same inode number.
+ . Works only for files (not directories, normally)
+ . If original file is deleted, hard link still works
+ 
+ 📌 Example:
+     touch file1.txt
+	 ln file1.txt file1_hard.txt  --> create hardlink.
+	 ls -li  --> check inode
+	 O/P example:
+	 12345 -rw-r--r-- 2 user user 0 file1.txt
+     12345 -rw-r--r-- 2 user user 0 file1_hard.txt  --> 👉 Both have same inode (12345)
+	 
+	 Delete original: rm file1.txt
+	 still Exists: cat file1_hard.txt
+	 
+	 
+🔗 Soft Link (Symbolic Link):
+=== ====== ===== =========== 
+  Soft link is like a shortcut. It points to the original file path.
+  . Different inode number
+  . If original file deleted → soft link breaks
+  
+  📌 Example:
+
+     Create file: touch file2.txt
+	 Create soft link: ln -s file2.txt file2_soft.txt
+	 Check: ls -li
+	 Example output: 
+	 22334 -rw-r--r-- 1 user user 0 file2.txt
+     33445 lrwxrwxrwx 1 user user 9 file2_soft.txt -> file2.txt
+	 
+	 👉 Different inode  👉 l indicates soft link.
+	 
+	 Delete original: rm file2.txt
+	 Now: cat file2_soft.txt  --> ❌ Error → No such file.
+	 
+	 Hard link: Another name for same file (same inode)
+     Soft link: Shortcut pointing to original file (different inode).
+
+
+
+🐧 Linux Directory Structure:
+===== ================ =========
+
+Linux directory structure is a tree structure.
+All directories come under root (/).
+Each directory has a specific purpose like user files, commands, settings, and logs.
+
+1. / (Root Directory): 
+
+             Top-most directory
+             Everything comes under this.
+   
+2. /boot – Boot Files:
+
+         Files needed to start Linux
+         Contains kernel and bootloader files
+         Without /boot → system will not start.
+   
+3. /etc – Configuration Files:
+
+        Contains system settings
+        Controls services and applications.
+     Ex:  /etc/passwd
+         /etc/group
+         /etc/ssh/sshd_config
+👉 If you change system settings → mostly you edit files in /etc.
+
+4. . /home – User Home Directories:
+
+      Each user gets a folder here
+	  /home/satyam
+      /home/student1
+	  Stores personal files
+
+      Contains hidden files like:
+	      .bashrc
+          .profile
+		  
+5.   /opt – Optional Software:
+
+		Used for third-party software
+
+		Manually installed applications
+		    Example:
+				/opt/google/
+				/opt/oracle/
+				/opt/myapp/
+				
+		
+6./dev – Device Files:
+	Linux treats hardware as files.
+
+ 	  | File        | Meaning       |
+| ----------- | ------------- |
+| `/dev/sda`  | Hard disk     |
+| `/dev/sda1` | Partition     |
+| `/dev/null` | Discards data |
+| `/dev/tty`  | Terminal      |
+👉 When you plug USB → Linux creates device file here.
+
+
+7./var (Variable Files):
+	Contains logs and system data
+	📌 Example:
+	     /var/log → system logs.
+		 
+8./bin – Basic Commands:
+        Contains important command files (binaries)
+     Needed for system to work
+     ex: 	ls
+			cp
+			mv
+			rm
+			mkdir
+	👉 Nowadays /bin is usually linked to /usr/bin			
+				
+
+9./sbin – System Commands:
+       Admin commands
+       Mostly used by root
+	   ex: reboot
+			fsck
+			iptables
+			
+10.	/usr – User Programs:
+    
+	 Contains most applications.
+	 Important subfolders:
+	      /usr/share/nginx/html --> nginx root directory
+          /usr/bin
+          /usr/sbin
+          /usr/local/bin/
+		  
+		  
+11./proc – Process Information (Virtual):
+    
+	    Not a real folder,  Shows live system information.
+		/proc/cpuinfo
+        /proc/meminfo
+        /proc/1234  (process ID)
+👉 Real-time kernel information.
+
+12./mnt – Manual Mount:
+
+    Used by system admin  - For temporary mounting
+	mount /dev/sdb1 /mnt
+👉 Mostly used for testing or recovery.
+
+
+13.sys: virtual file system:
+    it's a virtual file system that shows information about hardware and kernel.
+       It does not store real files
+       Files are created by the Linux kernel
+   
+   
+14: /media – Auto Mounted Devices/ removable devices
+    
+      Used for USB, CD, external drives,  Automatically mounted.
+	  /media/student/USB
+👉 Plug and play (like Windows)
+
+
+15./run – Runtime Files
+      Stores temporary runtime data
+      Cleared after reboot
+      Stores PID files
+
+
+16./tmp – Temporary Files:
+
+      Used for temporary storage
+      Deleted after reboot (in many systems)
+      Writable by all users
+	  
+	  
+17. /lib and /lib64 – Libraries:
+    
+	  Like .dll files in Windows
+      Needed to run programs
+
+          Example:
+             When you run ls:
+
+                System finds /bin/ls
+                Loads libraries from /lib or /lib64
+				Executes command
+				
+				
+18. /srv – Service Data:
+
+      Data used by services
+	   /srv/www
+       /srv/ftp
+	   
+	
+
+What is Memory Trouble?
+
+Memory issues happen when:
+
+Server becomes slow
+
+Application hangs
+
+System freezes
+
+Swap usage increases
+
+OOM Killer kills processes	.
+
+These are the TOP commands every Linux Admin uses:
+
+| Command           | Purpose                      |
+| ----------------- | ---------------------------- |
+| free -h           | Check memory usage           |
+| top               | Check running process memory |
+| htop              | Advanced top                 |
+| vmstat            | Memory statistics            |
+| ps aux            | Process memory usage         |
+| cat /proc/meminfo | Detailed memory info         |
+| sar -r            | Historical memory usage      |
+| pmap              | Process memory details       |
+
+ps aux --sort=-%mem | head -10
+
+Output:
+
+Shows top 10 memory consuming process.
+
+Q. Real Time Scenario Example:
+==== ========== ============
+1.Application not working- No space left on device:
+
+ 1.df -h
+    found /var-100%
+	check folder - du -sh /var/*
+	Found: /var/log using 20GB
+	Clear logs: truncate -s 0 /var/log/messages
+	
+	
+2.Disk full, what will you do?
+
+     Check disk- df -h
+	 check-directory- du -sh /*
+	 go inside cd /var du -sh*
+	 Delete unwanted files
+	 
+3. Server crashed?
+  Reason:
+   /var/log full
+   
+   solution:
+   truncate -s 0 /var/log/messages
+   
+   
+4.Real Time Important Locations :
+
+
+| Location | Use         |
+| -------- | ----------- |
+| /var/log | Logs        |
+| /tmp     | Temp files  |
+| /home    | User files  |
+| /opt     | Application |
+| /var/lib | Database    |
+
+
+5.CPU is 100%, what will you do?
+
+   1. Check CPU usage: top
+   2.Check load: uptime
+   3.Check top process: ps -eo pid,cmd,%cpu --sort=-%cpu | head
+   4.Check process details: top -p PID
+   5.Check IO wait: iostat -x 1
+   
+   First I will check CPU using top command, then check load average using uptime. 
+   Then identify high CPU process using ps command. Then check IO wait using iostat. 
+   After identifying root cause, I will restart or kill the process.
+   
+   
+	
