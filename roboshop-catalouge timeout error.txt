@@ -1,0 +1,101 @@
+Error Message: MongoServerSelectionError: Server selection timed out after 30000 ms
+
+This means your catalogue server is NOT able to connect to MongoDB server
+
+Trouble shooting methods:
+1.Check DNS Resolution
+
+ping mongodb.kimidi.site
+nslookup mongodb.kimidi.site
+
+Step 2 — Check Port Connectivity
+telnet mongodb.kimidi.site 27017
+nc -zv mongodb.kimidi.site 27017
+
+Step 5 — Check Firewall On MongoDB Server
+firewall-cmd --list-all
+👉 If port 27017 not allowed:
+firewall-cmd --add-port=27017/tcp --permanent
+firewall-cmd --reload
+
+
+mongosh --host mongodb.kimidi.site
+use catalogue
+show collections
+db.categories.find().count()
+
+show collections
+products
+
+👉 categories collection is missing
+👉 That means master-data.js did NOT fully load
+👉 RoboShop categories UI depends on this collection
+👉 That is why categories are not showing
+
+Create New File
+vi /app/db/master-data.js
+
+Paste FULL Working RoboShop Master Data:
+
+db = db.getSiblingDB('catalogue');
+
+db.products.insertMany([
+    {sku: 'Watson', name: 'Watson', description: 'Probably the smartest AI on the planet', price: 2001, instock: 2, categories: ['Artificial Intelligence']},
+    {sku: 'Ewooid', name: 'Ewooid', description: 'Fully sentient assistant', price: 200, instock: 0, categories: ['Artificial Intelligence']},
+    {sku: 'HPTD', name: 'High-Powered Travel Droid', description: 'Traveling to the far reaches of the Galaxy? You need this for protection.', price: 1200, instock: 12, categories: ['Robot']},
+    {sku: 'UHJ', name: 'Ultimate Harvesting Juggernaut', description: 'Extraterrestrial vegetation harvester', price: 5000, instock: 10, categories: ['Robot']},
+    {sku: 'EPE', name: 'Extreme Probe Emulator', description: 'Versatile interface adapter for hacking into systems', price: 953, instock: 1, categories: ['Robot']},
+    {sku: 'EMM', name: 'Exceptional Medical Machine', description: 'Fully automatic surgery droid', price: 1024, instock: 1, categories: ['Robot']},
+    {sku: 'SHCE', name: 'Strategic Human Control Emulator', description: 'Diplomatic protocol assistant', price: 300, instock: 12, categories: ['Robot']},
+    {sku: 'RED', name: 'Responsive Enforcer Droid', description: 'Security detail', price: 700, instock: 5, categories: ['Robot']},
+    {sku: 'RMC', name: 'Robotic Mining Cyborg', description: 'Excellent tunneling capability', price: 42, instock: 48, categories: ['Robot']},
+    {sku: 'STAN-1', name: 'Stan', description: 'Observability guru', price: 67, instock: 1000, categories: ['Robot', 'Artificial Intelligence']},
+    {sku: 'CNA', name: 'Cybernated Neutralization Android', description: 'Fresh air assistant', price: 1000, instock: 0, categories: ['Robot']}
+]);
+
+db.categories.insertMany([
+    {name: "Robot"},
+    {name: "Artificial Intelligence"}
+]);
+
+:wq
+
+mongosh --host mongodb.kimidi.site
+
+use catalogue
+db.dropDatabase()
+exit
+
+mongosh --host mongodb.kimidi.site </app/db/master-data.js
+
+mongosh --host mongodb.kimidi.site
+use catalogue
+show collections
+
+systemctl restart catalogue
+
+If You Want To Remove Duplicate Data
+db.categories.deleteMany({})
+db.products.find().pretty()
+
+If You Want Clean Data (Recommended)
+Step 1 — Delete Old Data
+
+Run inside mongosh:
+
+use catalogue
+db.categories.deleteMany({})
+db.products.deleteMany({})
+
+Step 2 — Re-run Script
+
+From shell:
+
+mongosh mongodb.kimidi.site /app/db/master-data.js
+
+Verification Commands
+
+After running script:
+
+db.categories.countDocuments()
+db.products.countDocuments()

@@ -1,0 +1,80 @@
+
+pwd --> present working directory
+
+cd --> change directory.
+
+cd .. --> one step back
+
+ls --> list subdirectories
+
+ls -la --> all files including hidden files and folders.
+
+sudo su - --> # means super user /Root user/admin access.
+
+ssh-keygen -f <file-name> -->  Generate the keys (Public-key, private-key)
+
+	
+Connect the user to linux server using keys:
+
+ssh -i <private-key>  user-name@pub-ip	
+ssh -i  daws84s ec2-user@98.81.70.98
+
+touch <file-name> --> creates one empty file.
+
+cat > <file-name> - usally called as redirection.
+Type text,enter and ctrl+d
+
+cat >> <file-name> --> Appends text to previous content.
+
+
+mkdir <name> --> creates directory
+rmdir --> remove empty directory
+rm -f --> forcefully removes file
+
+cp <source> <destination> --> copy files/folders
+mv <source> <destination> --> cut and paste 
+
+wget <URL> --> downloads the file.
+curl <URL> --> shows on the screen
+
+grep <word-to-search> <file> - same on the above search the file name or word.
+
+How do you check running log files:  tail -f <log-file>
+ 
+ 
+ command MODE
+==============
+:q -> quit the file
+:wq --> write and quit
+:wq! --> force write and quit
+:q! --> exit without saving
+
+useradd <user-name> --> create user
+
+id <user-name> --> displays the user info.
+
+groupadd <group-name>  --> group will be created
+
+usermod -g <group-name> <user>  --> user is added into particular group.
+
+Ex:  usermod -g devops suresh -->  suresh is added into devops groups.
+
+usermod -aG <secondery-group> <user>  --> user is added into secondery group.
+Ex:  usermod -aG testers suresh
+
+userdel <user-name> --> Delete the user.
+groupdel <group-name>  --> group also deleted
+
+passwd <user-name> --> create the password to the user.
+
+sudo Chmod 700 <file-name> --> give the fulle permissions to the user.
+
+sudo Change ownership:   Chown <user>:<group> file-name/folder.
+
+ps -> shows running process recent.
+
+ps -ef --> show all the process.
+
+ps -ef | grep <process-name> --> check the particular process.
+
+

@@ -1,0 +1,93 @@
+T family (Burstable – very popular)
+==========================================
+Used for low to medium workloads:
+
+| Instance  | vCPU | RAM  | Use case           |
+| --------- | ---- | ---- | ------------------ |
+| t2.micro  | 1    | 1 GB | Free tier, testing |
+| t3.micro  | 2    | 1 GB | Dev, small apps    |
+| t3.small  | 2    | 2 GB | APIs, web servers  |
+| t3.medium | 2    | 4 GB | Light production   |
+| t4g.micro | 2    | 1 GB | ARM-based, cheaper |
+
+Best for:
+Dev/Test
+Small web apps
+Jenkins, Ansible controller
+Bastion hosts
+
+
+M family (Balanced – production):
+========================================
+Instance	Use case
+m5.large	App servers
+m6i.large	Backend services
+m7i.large	Enterprise workloads
+
+📌 Best for:
+Production apps
+Microservices
+Backend servers
+
+
+Compute Optimized (High CPU)
+==============================
+🔵 C family
+Instance	Use case
+c5.large	High CPU apps
+c6i.large	Batch jobs
+c7g.large	ARM compute
+
+📌 Best for:
+High traffic APIs
+Video encoding
+Gaming servers
+CI/CD runners
+
+
+Memory Optimized (High RAM):
+==============================
+🟣 R family
+Instance	Use case
+r5.large	In-memory apps
+r6i.large	Databases
+r7g.large	Cache-heavy apps
+
+📌 Best for:
+PostgreSQL
+MongoDB
+Redis
+Elasticsearch
+
+
+X family (Very high memory):
+===========================
+Instance	Use case
+x2idn	    SAP HANA
+x2iedn	    Big data
+
+
+Storage Optimized (Fast disk):
+===============================
+🟠 I / D family
+Instance	Use case
+i3.large	NoSQL databases
+i4i.large	High IOPS
+d3.large	Big data storage
+
+📌 Best for:
+Cassandra
+Elasticsearch
+Data analytics
+
+
+
+🧠 Quick comparison (easy to remember):
+=============================================
+Workload	            Instance
+Free tier / practice	t2.micro
+Dev / QA	            t3.micro
+Production web app	    m5.large
+CPU heavy	c6i
+Database	r6i
+ML / GPU	g4dn

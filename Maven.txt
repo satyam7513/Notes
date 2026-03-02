@@ -1,0 +1,97 @@
+1. What is Maven?
+Apache Maven is a Build Automation and Dependency Management Tool 
+used mainly for Java projects.
+
+It helps to: Compile code, Download dependencies,Run tests,Package application,Deploy application
+
+
+2. Why Maven is Needed in Real Projects
+
+Before Maven ❌
+
+• Developers manually download jars
+• Version conflicts
+• Build not consistent
+
+After Maven ✅
+
+• Automatic dependency download
+• Standard project structure
+• Easy CI/CD integration.
+
+4. Maven Project Structure.
+    
+	my-app
+ ├── pom.xml
+ └── src
+     ├── main
+     │    └── java
+     └── test
+          └── java
+
+5. What is pom.xml
+Full Form: Project Object Model, This is the heart of Maven
+Controls everything.
+ 
+Example:
+
+<project>
+
+<modelVersion>4.0.0</modelVersion>
+
+<groupId>com.company</groupId>
+
+<artifactId>my-app</artifactId>
+
+<version>1.0</version>
+
+<packaging>jar</packaging>
+
+</project>
+
+groupId        artifactId                           version
+com.infosys    (project-name)-payment-service           1.1
+
+Packaging:  jar, war, ear.
+ real time: spring boot --> jar
+            web application   --> war
+			
+			
+7. Maven Dependency:
+   Dependency means:  External libraries required.	
+  
+   Maven automatically downloads jar.
+ Location: C:\Users\user\.m2\repository
+
+maven life cycle -->  clean compile test and package
+package == compile+test+package   
+			
+			
+Most Used Maven Commands:
+
+mvn install  --> stores in local Repository.
+mvn clean  --> Deletes target folder.
+mvn clean install.
+mvn compile
+mvn test
+mvn package
+Output: target/my-app.jar
+
+
+
+Real Time DevOps Flow (Important):
+
+Developer:
+
+Writes code → Push to Git --> Jenkins:Pull code --> Run Maven (mvn clean install) ->
+create jar --> Deploy to tomcat /docker/kubernetes.
+
+Maven Repository:  3 types
+Local Repository: location --> .m2 folder
+Central Repository: Default ex: https://repo.maven.apache.org
+Remote Repository: Ex: Nexus/Artifactory
+
+
+
+
+ 
