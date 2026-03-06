@@ -1,7 +1,7 @@
 Special variables in shell
 ============================
 we no need to define the variable, shell will provide to us.
-ex: $1
+
 
 if you want all variables passed to script: $@
 number of variables passed: $#
@@ -25,10 +25,10 @@ echo "Number of variables: $#"
 
 we can pass the variables in sh command:
 sh 08-special-vars.sh devops aws azure
-o/p: Number of variables: 3
+o/p:
+===========
 
-
-
+Number of variables: 3
 echo "Script name: $0"
 echo "Current Directory: $PWD"
 echo "User running this script: $USER"
@@ -126,6 +126,10 @@ check the status- echo $? --> its shows 0 means its success.
 # ####how do you check the exit status code in shell scripting?  --> by checking the variable $? -> very imp in interviews.
 
 
+
+Install MYsQl:
+=============
+
 #!/bin/bash
 
 USERID=$(id -u)  -> id -u means UID of the current user,$-> stores command output in variable (Root user UID = 0) 
@@ -157,8 +161,6 @@ else
 fi
 
 
-
-			
 
 
 # FUNCTIONS:

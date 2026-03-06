@@ -1,0 +1,384 @@
+Colors in Shell:  (colors in shell script search in google)
+================
+\e[<Code>m
+
+31 --> red  32 --> green  33 --> yellow
+
+echo -e "hello world" --> e means enable
+
+echo -e "\e[31m Hello world"  --> o/p print in red colour
+
+echo -e "\e[32m Hello world"  --> o/p print in green colour
+
+echo -e "\e[33m Hello World"  --> o/p print in yellow colour
+
+echo -e "\e[34m Hello World" --> o/p print in blue colour
+
+echo -e "\[35m Hello world"  --> o/p print in different colour"
+
+echo -e "\[0m Hello world"   --> o/p No colour
+
+
+12-colors.sh:
+=============
+#!/bin/bash
+
+echo -e "\e[31m Hello Colors \e[0m"    #\e[0m means red colour is ended.
+
+echo "Hello No Colors"
+
+
+13.colors.sh:
+================
+
+#!/bin/bash
+
+USERID=$(id -u)
+R="\e[31m"
+G="\e[32m"
+Y="\e[33m"
+N="\e[0m"
+
+if [ $USERID -ne 0 ]
+then
+    echo -e "$R ERROR:: Please run this script with root access $N" #$N means Reset all formatting (color, bold, underline, etc.) back to normal
+    exit 1 #give other than 0 upto 127
+else
+    echo "You are running with root access"
+fi
+
+# validate functions takes input as exit status, what command they tried to install
+VALIDATE(){
+    if [ $1 -eq 0 ]
+    then
+        echo -e "Installing $2 is ... $G SUCCESS $N"
+    else
+        echo -e "Installing $2 is ... $R FAILURE $N"
+        exit 1
+    fi
+}
+
+dnf list installed mysql
+if [ $? -ne 0 ]
+then
+    echo "MySQL is not installed... going to install it"
+    dnf install mysql -y
+    VALIDATE $? "MySQL"
+else
+    echo -e "Nothing to do MySQL... $Y already installed $N"
+fi
+
+dnf list installed python3
+if [ $? -ne 0 ]
+then
+    echo "python3 is not installed... going to install it"
+    dnf install python3 -y
+    VALIDATE $? "python3"
+else
+    echo -e "Nothing to do python... $Y already installed $N"
+fi
+
+dnf list installed nginx
+if [ $? -ne 0 ]
+then
+    echo "nginx is not installed... going to install it"
+    dnf install nginx -y
+    VALIDATE $? "nginx"
+else
+    echo -e "Nothing to do nginx... $Y already installed $N"
+fi
+
+
+
+
+
+Redirections:
+===== ====== ====
+
+< --> denotes input
+> --> denotes output
+
+
+| Operator | Meaning                             |
+| -------- | ----------------------------------- |
+| `>`      | Redirect output to file (overwrite) |
+| `>>`     | Redirect output to file (append)    |
+| `<`      | Take input from file                |
+| `2>`     | Redirect error output               |
+| `&>`     | Redirect both output and error      |
+
+
+why we are using redirections:
+In real-time environments (like servers, automation scripts, cron jobs, DevOps tasks), 
+scripts run in background. We cannot see the terminal output.
+So we redirect output to log files to:
+
+1. Store Execution Details:
+       ./backup.sh > backup.log  --> This saves all output into backup.log.
+	   
+
+2.Debug Errors:
+      ./install.sh 2> error.log  --> Only errors go to error.log.
+	  
+3.Append Logs (Don't Overwrite Old Logs):
+      ./script.sh >> app.log 2>&1   ---> Very important in production — keeps previous logs.
+	  
+	  
+
+14.logs.sh:
+============
+
+#!/bin/bash
+
+USERID=$(id -u)
+R="\e[31m"  #m for graphic Mode
+G="\e[32m"
+Y="\e[33m"
+N="\e[0m"
+
+LOGS_FOLDER="/var/log/shellscript-logs"  # default log path
+SCRIPT_NAME=$(echo $0 | cut -d "." -f1) 
+
+#$0 gives the name of the current running script.
+#cut -d "." -f1 --> -d "." - use . as delimeter,  -f1 take the first field (before the dot)
+
+example: 
+echo 14-logs.sh
+echo 14-logs.sh | cut -d "." -f1
+o/p: 14-logs
+
+ 
+LOG_FILE=$LOGS_FOLDER/SCRIPT_NAME.log"
+
+mkdir -p $LOGS_FOLDER #p means if the folder is not there its created, if folder is exist doesn't throw error.
+echo "script started executing at: $(date)" | tee -a $LOG_FILE
+
+# In this scenario the user doesn't know if its sucees or not.
+so i want basic log on the screen too thats why
+we are using "tee" command in linux. 
+tee command it's dispaly the output in screen and append the logs in that file(log_file)
+
+
+#tee -> prints output and wrties to file.
+#-a --> append (don't over write)
+
+&>>$LOF_FILE --> wherever output is required give like that.
+
+if [ $USERID -ne 0 ]
+then
+    echo -e "$R ERROR:: Please run this script with root access $N" | tee -a $LOG_FILE
+    exit 1 #give other than 0 upto 127
+else
+    echo "You are running with root access" | tee -a $LOG_FILE
+fi
+
+# validate functions takes input as exit status, what command they tried to install
+VALIDATE(){
+    if [ $1 -eq 0 ]
+    then
+        echo -e "Installing $2 is ... $G SUCCESS $N" | tee -a $LOG_FILE
+    else
+        echo -e "Installing $2 is ... $R FAILURE $N" | tee -a $LOG_FILE
+        exit 1
+    fi
+}
+
+dnf list installed mysql &>>$LOG_FILE
+if [ $? -ne 0 ]
+then
+    echo "MySQL is not installed... going to install it" | tee -a $LOG_FILE
+    dnf install mysql -y &>>$LOG_FILE
+    VALIDATE $? "MySQL"
+else
+    echo -e "Nothing to do MySQL... $Y already installed $N" | tee -a $LOG_FILE
+fi
+
+dnf list installed python3 &>>$LOG_FILE
+if [ $? -ne 0 ]
+then
+    echo "python3 is not installed... going to install it" | tee -a $LOG_FILE
+    dnf install python3 -y &>>$LOG_FILE
+    VALIDATE $? "python3"
+else
+    echo -e "Nothing to do python... $Y already installed $N" | tee -a $LOG_FILE
+fi
+
+dnf list installed nginx &>>$LOG_FILE
+if [ $? -ne 0 ]
+then
+    echo "nginx is not installed... going to install it" | tee -a $LOG_FILE
+    dnf install nginx -y &>>$LOG_FILE
+    VALIDATE $? "nginx"
+else
+    echo -e "Nothing to do nginx... $Y already installed $N" | tee -a $LOG_FILE
+fi
+
+
+sh 14-logs.sh
+# check the output:
+cat /var/log/shellscript-logs/14-logs.log
+
+
+
+
+LOOPS:  for example if you want install 3 packages we are using the functions.
+======  ========================= ================ ========================
+
+if you want install 20 packges. now we goto loops.
+
+Normal we want to print 100 numbers: c language
+
+for(int i=0; i<=100; i++){
+      print i;
+	  }
+	  
+General we are writing this script.
+
+shell scripting we are writing like this way:
+15.For-loop.sh:
+=================== 
+
+              #!/bin/bash
+
+                 for i in {1..100}
+                 do
+                 echo $i
+                 done
+
+16.loops.sh
+=======================================
+
+* PACKAGES=("mysql" "python" "nginx" "httpd")
+* for package in ${PACKAGES[@]}
+* #for package in $@ --> you give the packages on run time like sh 16.loopssh http nginx mysql ......like that
+
+	  
+	#!/bin/bash
+
+USERID=$(id -u)
+R="\e[31m"
+G="\e[32m"
+Y="\e[33m"
+N="\e[0m"
+LOGS_FOLDER="/var/log/shellscript-logs"
+SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
+LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
+PACKAGES=("mysql" "python" "nginx" "httpd")
+
+mkdir -p $LOGS_FOLDER
+echo "Script started executing at: $(date)" | tee -a $LOG_FILE
+
+if [ $USERID -ne 0 ]
+then
+    echo -e "$R ERROR:: Please run this script with root access $N" | tee -a $LOG_FILE
+    exit 1 #give other than 0 upto 127
+else
+    echo "You are running with root access" | tee -a $LOG_FILE
+fi
+
+# validate functions takes input as exit status, what command they tried to install
+VALIDATE(){
+    if [ $1 -eq 0 ]
+    then
+        echo -e "Installing $2 is ... $G SUCCESS $N" | tee -a $LOG_FILE
+    else
+        echo -e "Installing $2 is ... $R FAILURE $N" | tee -a $LOG_FILE
+        exit 1
+    fi
+}
+
+for package in ${PACKAGES[@]}
+#for package in $@
+do
+    dnf list installed $package &>>$LOG_FILE
+    if [ $? -ne 0 ]
+    then
+        echo "$package is not installed... going to install it" | tee -a $LOG_FILE
+        dnf install $package -y &>>$LOG_FILE
+        VALIDATE $? "$package"
+    else
+        echo -e "Nothing to do $package... $Y already installed $N" | tee -a $LOG_FILE
+    fi
+done  
+
+
+
+
+17.set.sh:
+===========
+
+#!/bin/bash
+
+set -e
+
+echo "Hi, Good Morning"
+echoooooo "Hello, this will be error"
+echo "Hello, Morning"
+
+set -e means:
+👉 If any command fails (returns non-zero exit status), stop the script immediately.
+
+So if any command gives an error, the script will exit at that point.
+
+
+create a new repository "shell-roboshop":
+==============   =========== ==========
+
+what are the sequence operation we are doing in Roboshop-project:
+
+1.create 11 instances
+2.rename them
+3. update r53 record
+     if (instance is frontend)
+	      update public ip
+	  else
+	      update private ip
+		  
+		  
+forntend --> API --> backend.
+
+For example: intermediate result
+
+AP website,  eenadu, manabadi ....
+
+Govt maintain website ---> They didn't give the daatbase website directly.
+They Give API Site, we are conecting only API sites only.
+
+They didn't provide every one for website access.
+some Authentication & Authorization is compulsery.
+
+IN our case we are using like that 
+
+Aws console --> Aws API  --> AWS. (Show Diagram Representation)
+
+authentication and authorization
+================================
+Authentication --> Prove yourself
+Authorization  --> Prove yourself, check whether you have access or not.
+
+access key and secret key --> like username & password 
+
+IAM --> Identity and Access Managaement (IAM)
+
+craete user --> username (aws-cli) -> next --> attach policies -> Administartor access-> create user.
+
+click on Aws-cli user --> secutiry credentials --> create acces-key -> select command line interface(cli) --> next -> create acces key.
+
+shows the Access key & Secret key.
+
+aws configure 
+
+you give acces-key & secret-key.
+
+ aws configure
+AWS Access Key ID [None]: 
+AWS Secret Access Key [None]: 
+Default region name [None]: us-east-1
+Default output format [None]:
+ 		  
+ aws s3 ls --> just check working or not, no o/p also fine except error		
+
+aws ec2 run-instances --image-id ami-09c813fb71547fc4f --instance-type t2.micro --security-group-ids sg-01bc7ebe005fb1cb2 --tag-specifications "ResourceType=instance,Tags=[{Key=Name, Value=test}]" --query "Instances[0].PrivateIpAddress" --output text
+
+
+aws ec2 describe-instances --instance-ids i-0abcdef123456789 --query "Reservations[0].Instances[0].PrivateIpAddress" --output text
