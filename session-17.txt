@@ -1,0 +1,267 @@
+1. when you want to automate anything- Process idea is must.
+2. Coding syntax - you can easily write any script or coding.
+
+goto goole: search
+aws cli to create or update route53 records
+
+  aws route53 change-resource-record-sets \  ##is used to create, update, or delete DNS records in Route53.
+    --hosted-zone-id $ZONE_ID \
+    --change-batch '
+    {
+        "Comment": "Creating or Updating a record set for cognito endpoint"
+        ,"Changes": [{	
+        "Action":  "UPSERT"   ###if record exists over write,If record does not exist → create it
+        ,"ResourceRecordSet"  : {
+            "Name"              : "'$instance'.'$DOMAIN_NAME'"  # Actual DNS Record(DNS name dynamically using shell variables)
+            ,"Type"             : "A"  #ipv4 address
+            ,"TTL"              : 1
+            ,"ResourceRecords"  : [{
+                "Value"         : "'$IP'"  #This specifies the IP address for the A record.
+            }]
+        }
+        }]
+    }'
+
+
+example: The created DNS record will be: mongodb.kimidi.site 192.168.45.20
+we can check the s3 records, is it updated or not.
+
+
+
+Create mongodb.sh
+================
+open the Roboshop documentation:
+
+first we can configure mongo.repo & mongodb.sh
+
+copy the same code upto validation. (change the validation message success/failure)
+
+#!/bin/bash
+
+USERID=$(id -u)
+R="\e[31m"
+G="\e[32m"
+Y="\e[33m"
+N="\e[0m"
+LOGS_FOLDER="/var/log/roboshop-logs" ### change the logs folder /roboshop-logs
+SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
+LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
+
+mkdir -p $LOGS_FOLDER
+echo "Script started executing at: $(date)" | tee -a $LOG_FILE
+
+# check the user has root priveleges or not
+if [ $USERID -ne 0 ]
+then
+    echo -e "$R ERROR:: Please run this script with root access $N" | tee -a $LOG_FILE
+    exit 1 #give other than 0 upto 127
+else
+    echo "You are running with root access" | tee -a $LOG_FILE
+fi
+
+
+# validate functions takes input as exit status, what command they tried to install
+VALIDATE(){
+    if [ $1 -eq 0 ]
+    then
+        echo -e "$2 is ... $G SUCCESS $N" | tee -a $LOG_FILE
+    else
+        echo -e "$2 is ... $R FAILURE $N" | tee -a $LOG_FILE
+        exit 1
+    fi
+}
+
+cp mongo.repo /etc/yum.repos.d/mongodb.repo
+VALIDATE $? "Copying MongoDB repo"
+
+
+cp mongo.repo /etc/yum.repos.d/mongodb.repo
+VALIDATE $? "Copying MongoDB repo"
+
+dnf install mongodb-org -y &>>$LOG_FILE
+VALIDATE $? "Installing mongodb server"
+
+systemctl enable mongod &>>$LOG_FILE
+VALIDATE $? "Enabling MongoDB"
+
+systemctl start mongod &>>$LOG_FILE
+VALIDATE $? "Starting MongoDB"
+
+sed editor --> stream editor
+IN Mongodb we can change the bind portno 127.0.0.1 to 0.0.0.0 so 
+we can use Sed editor .
+
+sed (Stream Editor) is a Linux command-line tool used to read, edit, and transform text streams line by line.
+It is commonly used to search, replace, delete, or modify text in files or command outputs.
+Unlike editors like vi or nano, sed works non-interactively from the command line or inside scripts.
+
+
+syntax: sed -i/-e 'expression' filename
+
+example:
+===== ===
+goto ec2-user
+
+cp /etc/passwd users
+cat users
+
+adding the line using sed:
+sed -e '1 a hello world' users
+
+check the output in cat users. hello world is not showing.
+
+sed editor this is the main advanatage.
+
+-e --> temp change onto the screen
+-i --> perminent  change.
+
+sed -i '1 a hello world' users --> after the 1st line.
+
+sed -i '1 i hello world' users -- insert before the 1 st line.
+
+sed -i '1 d' users --> line no 1 deleted.
+
+sed -e 's/root/ADMIN/g' users --> root replace with admin.
+
+sed -e '/overflow/ d' users --> overflow word deleted
+
+sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf 
+
+s-substitute  
+
+
+sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
+VALIDATE $? "Editing MongoDB conf file for remote connections"
+
+systemctl restart mongod &>>$LOG_FILE
+VALIDATE $? "Restarting MongoDB"
+
+after complete the code - we login into mongodb-server
+clone the repo shell-roboshop
+sh mongodb.sh
+after completion of succesful installation cheking with port-no
+netstat -lntp --> port no: 27017
+
+
+
+catalogue.sh:
+===========
+
+first we can create catalogue.sh & catalogue.service
+
+same code copy with upto validation.
+Go through roboshop documentation.
+
+*** SCRIPT_DIR=$PWD
+*** cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service--> using absolute path.
+
+dnf module disable nodejs -y &>>$LOG_FILE
+VALIDATE $? "Disabling default nodejs"
+
+dnf module enable nodejs:20 -y &>>$LOG_FILE
+VALIDATE $? "Enabling nodejs:20"
+
+dnf install nodejs -y &>>$LOG_FILE
+VALIDATE $? "Installing nodejs:20"
+
+useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE
+VALIDATE $? "Creating roboshop system user"
+
+mkdir -p /app 
+VALIDATE $? "Creating app directory"
+
+curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip &>>$LOG_FILE
+VALIDATE $? "Downloading Catalogue"
+
+cd /app 
+unzip /tmp/catalogue.zip &>>$LOG_FILE
+VALIDATE $? "unzipping catalogue"
+
+npm install &>>$LOG_FILE
+VALIDATE $? "Installing Dependencies"
+
+cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service
+VALIDATE $? "Copying catalogue service"
+
+systemctl daemon-reload &>>$LOG_FILE
+systemctl enable catalogue  &>>$LOG_FILE
+systemctl start catalogue
+VALIDATE $? "Starting Catalogue"
+
+cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo 
+dnf install mongodb-mongosh -y &>>$LOG_FILE
+VALIDATE $? "Installing MongoDB Client"
+
+mongosh --host mongodb.kimidi.site </app/db/master-data.js &>>$LOG_FILE
+VALIDATE $? "Loading data into MongoDB"
+
+
+after complete the code- we must login into the cataloge server
+git clone shell-roboshop
+cd shell-roboshop
+sh cataloge.sh
+
+check netstat -lntp --> port no:8080
+curl http://localhost:8080/health
+
+catalogue script run into 2 nd time, you must get error. this is the Idempotency issue.
+
+Idempotency:
+======= ====
+Irrespective of the number of time you run something it should not change the result.
+
+API Development.
+
+post (not idempotency)--> first time entry willbe created ,second time you entry on the same credentials its shows error.
+
+so first check user already exist or not,if not create otherwise show the error.
+
+Get --> Idempotency(Every time you run it don't change the result)
+Put(Update)---> idempotency, but for better experience, same details are already updated.
+DELETE ---> Idemoptent, but for better user experience, user already deleted.
+
+** second time you run this script through error.why because roboshop user already craeted,
+so we can add check user already exist or not.
+
+**id roboshop
+if [ $? -ne 0]
+then 
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE
+    VALIDATE $? "Creating roboshop system user"
+else
+    echo -e "System user roboshop already created ... $Y SKIPPING $N"
+fi
+
+*** mkdir -p /app --> check app dir already exist or not.
+
+**** rm -rf /app/* --> already any data is exist into the app dir, remove on it.
+
+***** shell script to check whether a db is exist or not in mongodb (search in google it shows the code)
+
+    STATUS=$(mongosh --host mongodb.daws84s.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
+if [ $STATUS -lt 0 ]
+then
+    mongosh --host mongodb.daws84s.site </app/db/master-data.js &>>$LOG_FILE
+    VALIDATE $? "Loading data into MongoDB"
+else
+    echo -e "Data is already loaded ... $Y SKIPPING $N"
+fi
+
+
+
+Frontend.sh:
+==== ========
+
+upto validation same code copy it.
+
+create frontend.sh & nginx.conf in vs-code.
+copy the code and paste it, (/etc/nginx/nginx.conf)
+
+upto validation same code copy it.
+
+After complete the code: login into frontend server. 
+git clone shell-roboshop repo.
+sudo sh frontend.sh
+netstat -lntp
+
+

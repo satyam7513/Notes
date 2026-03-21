@@ -1,0 +1,156 @@
+Chinna@70329618
+
+roboshop.sh --> change some lines
+
+*** for instance in $@  -> we can pass the args in run time.if you can give the args when exicution time.
+
+ *** RECORD_NAME="$instance.$DOMAIN_NAME"
+ 
+ *** route53 code change into  "Name"              : "'$RECORD_NAME'"
+ 
+ 
+
+
+REDIS.SH:
+== =====
+
+
+START_TIME=$(date +%s) --> calculate the script start time.
+
+upto validation -copy the same code.
+
+
+dnf module disable redis -y &>>$LOG_FILE
+VALIDATE $? "Disabling Default Redis version"
+
+dnf module enable redis:7 -y &>>$LOG_FILE
+VALIDATE $? "Enabling Redis:7"
+
+dnf install redis -y &>>$LOG_FILE
+VALIDATE $? "Installing Redis"
+
+sed -i -e 's/127.0.0.1/0.0.0.0/g' -e '/protected-mode/ c protected-mode no' /etc/redis/redis.conf
+VALIDATE $? "Edited redis.conf to accept remote connections"
+
+systemctl enable redis &>>$LOG_FILE
+VALIDATE $? "Enabling Redis"
+
+systemctl start redis  &>>$LOG_FILE
+VALIDATE $? "Started Redis"
+
+END_TIME=$(date +%s) --> calculate the script end time.
+TOTAL_TIME=$(( $END_TIME - $START_TIME ))
+
+echo -e "Script exection completed successfully, $Y time taken: $TOTAL_TIME seconds $N" | tee -a $LOG_FILE
+
+sh roboshop.sh redis user cart --> create these 3 servers.
+After login to the servers and clone the Repo.
+git pull
+sh redis.sh
+netstat -lntp
+
+
+user.sh:
+==== ====
+user and catalouge both are same so same code copy here.
+
+create 2 files: user.service  & user.sh
+
+catalouge replace with user.
+
+Remove mongod content . user its not required mongod content.
+
+Login to the user-server and clone the repo
+
+sh user.sh
+
+
+cart.sh:
+=== ======
+create cart.sh & cart.service
+
+same user code is copy with this location.
+
+replace user with cart.
+
+login to cart server, clone repo
+
+sh cart.sh
+
+changes into "frontend" add the domain names.(vi /etc/nginx/nginx.conf)
+
+After finish the cart, you must push the changes in fronted and after pull .
+otherwise you must see the 400 Error.
+
+** goto frontend --> git pull --> sh frontend.sh (Solve the 400 error)
+
+
+mysql &  shipping:
+==== =============
+goto shell-roboshop run sh roboshop.sh mysql shipping
+
+mysql.sh:
+=== ===
+upto validation same code.
+
+****
+echo "Please enter root password to setup"
+read -s MYSQL_ROOT_PASSWORD
+
+
+dnf install mysql-server -y &>>$LOG_FILE
+VALIDATE $? "Installing MySQL server"
+
+systemctl enable mysqld &>>$LOG_FILE
+VALIDATE $? "Enabling MySQL"
+
+systemctl start mysqld   &>>$LOG_FILE
+VALIDATE $? "Starting MySQL"
+
+mysql_secure_installation --set-root-pass $MYSQL_ROOT_PASSWORD &>>$LOG_FILE
+VALIDATE $? "Setting MySQL root password"
+
+END_TIME=$(date +%s)
+TOTAL_TIME=$(( $END_TIME - $START_TIME ))
+
+echo -e "Script exection completed successfully, $Y time taken: $TOTAL_TIME seconds $N" | tee -a $LOG_FILE
+
+
+lgoin into mysql server-clone repo
+
+sh mysql.sh
+
+mysql -h mysql.kimidi.site -u root -pRoboShop@1 (check the enter into mysql or not)
+
+
+Shipping.sh:
+=== ========
+create 2 folders in vs-code: shipping.sh , shipping.service.
+Copy the same code upto validation.
+
+sh shipping.sh
+
+checking 
+mysql -h mysql.kimidi.site -u root -pRoboShop@1 -e 'use cities'
+echo $? --> 0 means success.
+
+mysql -h mysql.kimidi.site -u root -pRoboShop@1 -e 'use transactions'
+echo $? -->1 means failure.
+
+Rabbitmq:
+=== =====
+
+payment:
+== =====
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,293 @@
+DRY --> Don't repeat yourself.
+
+write a seperate file, create functions with all common code,call when required...
+
+How to Call Another Script from the Current Script?
+=====  ===============  =======================
+
+We have two scripts:
+
+script-1.sh
+
+script-2.sh
+
+There are two ways to call one script from another script.
+
+1️.Using ./script-2.sh (or bash script-2.sh)
+2️.Using source script-2.sh
+
+Method 1: Using ./script-2.sh:
+
+script-1.sh
+
+#!/bin/bash
+GREETING="Hello, Good Morning"
+echo "$GREETING"
+
+echo "PID of SCRIPT-1: $$" #$$-pid of the current running script.
+./script-2.sh
+
+
+script-2.sh
+#!/bin/bash
+
+echo "PID of SCRIPT-2: $$"
+
+echo "$GREETING"
+Give execute permission
+chmod +x script-1.sh script-2.sh
+
+Run: ./script-1.sh
+
+Output Example:
+=============
+Hello, Good Morning
+PID of SCRIPT-1: 1751
+PID of SCRIPT-2: 1752
+
+Explanation
+
+When we use:
+
+./script-2.sh
+
+script-2 runs in a new shell (child process)
+
+PID will be different.
+
+script-2 cannot access variables from script-1
+
+So $GREETING may not be available in script-2.
+
+
+Method 2: Using source script-2.sh
+========== =====================
+
+script-1.sh
+
+#!/bin/bash
+
+GREETING="Hello, Good Morning"
+
+echo "$GREETING"
+echo "PID of SCRIPT-1: $$"
+
+source ./script-2.sh
+
+
+script-2.sh
+
+#!/bin/bash
+
+echo "PID of SCRIPT-2: $$"
+
+echo "$GREETING"
+
+Run: sh script-1.sh
+
+Output Example:
+==== =========
+Hello, Good Morning
+PID of SCRIPT-1: 1788
+PID of SCRIPT-2: 1788
+Hello, Good Morning
+
+
+Explanation:
+============
+When we use:
+
+source script-2.sh
+
+script-2 runs in the same shell
+
+PID will be the same
+
+script-2 can access variables from script-1
+
+So $GREETING is available in script-2.
+
+Final Summary:
+
+   Method	                 PID	                             Variable Access
+ ./script-2.sh	          Different	                          Cannot access script-1 variables
+ source script-2.sh	        Same                              Can access script-1 variables
+
+
+
+Code is repeted into all the catagories. so we can write one common script:
+we are creating common.sh:
+=== ================ ========
+#!/bin/bash
+
+START_TIME=$(date +%s)
+USERID=$(id -u)
+R="\e[31m"
+G="\e[32m"
+Y="\e[33m"
+N="\e[0m"
+LOGS_FOLDER="/var/log/roboshop-logs"
+SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
+LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
+SCRIPT_DIR=$PWD
+
+mkdir -p $LOGS_FOLDER
+echo "Script started executing at: $(date)" | tee -a $LOG_FILE
+
+check_root(){
+   if [ $USERID -ne 0 ]
+    then
+        echo -e "$R ERROR:: Please run this script with root access $N" | tee -a $LOG_FILE
+        exit 1 #give other than 0 upto 127
+    else
+        echo "You are running with root access" | tee -a $LOG_FILE
+    fi
+
+}
+
+VALIDATE(){
+ if [ $1 -eq 0 ]
+    then
+        echo -e "$2 is ... $G SUCCESS $N" | tee -a $LOG_FILE
+    else
+        echo -e "$2 is ... $R FAILURE $N" | tee -a $LOG_FILE
+        exit 1
+    fi
+}
+
+*** VALIDATE: Functions are must and shoud call into the scripts. so validate is not mentioned specifically.
+
+print_time(){
+    END_TIME=$(date +%s)
+    TOTAL_TIME=$(($END_TIME - $START_TIME))
+    echo -e "Script executed successfully, $Y Time taken: $TOTAL_TIME seconds $N"
+}
+
+
+Mongodb.sh:
+==========
+#!/bin/bash
+
+source ./common.sh
+app_name=mongodb
+
+check_root
+
+cp mongo.repo /etc/yum.repos.d/mongodb.repo
+VALIDATE $? "Copying MongoDB repo"
+
+dnf install mongodb-org -y  &>>$LOG_FILE
+VALIDATE $? "installing mongodb server"
+
+systemctl enable mongod  &>>$LOG_FILE
+VALIDATE $? "Enabling MongoDB"
+
+systemctl start mongod  &>>$LOG_FILE
+VALIDATE $? "Starting MongoDB"
+
+sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
+VALIDATE $? "Editing MongoDB conf file for remote connections"
+
+systemctl restart mongod &>>$LOG_FILE
+VALIDATE $? "Restarting MongoDB"
+
+print_time
+
+
+
+catalogue.sh:
+=============
+common.sh:
+---------
+app_setup(){
+    id roboshop &>>$LOG_FILE
+    if [ $? -ne 0 ]
+    then
+        useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE
+        VALIDATE $? "Creating roboshop system user"
+    else
+        echo -e "System user roboshop already created ... $Y SKIPPING $N"
+    fi
+
+    mkdir -p /app 
+    VALIDATE $? "Creating app directory"
+
+    curl -o /tmp/$app_name.zip https://roboshop-artifacts.s3.amazonaws.com/$app_name-v3.zip &>>$LOG_FILE
+    VALIDATE $? "Downloading $app_name"
+
+    rm -rf /app/*
+    cd /app 
+    unzip /tmp/$app_name.zip &>>$LOG_FILE
+    VALIDATE $? "unzipping $app_name"
+}
+
+
+nodejs_setup(){
+    dnf module disable nodejs -y &>>$LOG_FILE
+    VALIDATE $? "Disabling default nodejs"
+
+    dnf module enable nodejs:20 -y &>>$LOG_FILE
+    VALIDATE $? "Enabling nodejs:20"
+
+    dnf install nodejs -y &>>$LOG_FILE
+    VALIDATE $? "Installing nodejs:20"
+
+    npm install &>>$LOG_FILE
+    VALIDATE $? "Installing Dependencies"
+}
+
+
+systemd_setup(){
+    cp $SCRIPT_DIR/$app_name.service /etc/systemd/system/$app_name.service
+    VALIDATE $? "Copying $app_name service"
+
+    systemctl daemon-reload &>>$LOG_FILE
+    systemctl enable $app_name  &>>$LOG_FILE
+    systemctl start $app_name
+    VALIDATE $? "Starting $app_name"
+}
+
+check_root()
+VALIDATE()
+print_time()
+
+catalogue.sh
+-------------
+#!/bin/bash
+
+source ./common.sh
+app_name=catalogue
+
+check_root
+app_setup
+nodejs_setup
+systemd_setup
+
+cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo 
+dnf install mongodb-mongosh -y &>>$LOG_FILE
+VALIDATE $? "Installing MongoDB Client"
+
+STATUS=$(mongosh --host mongodb.daws84s.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
+if [ $STATUS -lt 0 ]
+then
+    mongosh --host mongodb.daws84s.site </app/db/master-data.js &>>$LOG_FILE
+    VALIDATE $? "Loading data into MongoDB"
+else
+    echo -e "Data is already loaded ... $Y SKIPPING $N"
+fi
+
+print_time
+
+
+
+
+
+
+
+
+
+
+
+
+
+
