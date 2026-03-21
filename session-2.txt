@@ -1,0 +1,309 @@
+What is a Computer?
+
+A computer is an IP-enabled device.
+
+Examples of computers:
+
+Laptop Mobile Server Chip TV
+
+All of these are computers if they can connect to a network.
+
+Server: A server is a computer that is mainly used to host applications.
+======= 
+A computer typically contains:
+
+RAM Operating System (OS)  Hard Disk (HD)  Processor  Network capability (IP enabled)
+
+
+Client–Server Architecture:
+=========================== 
+
+Computers communicate with each other through networking.
+
+Example: Network  Facebook Application
+
+Example explanation:
+
+A server serves clients, similar to how a lawyer serves clients.
+
+Example:
+
+Facebook runs on Linux servers.
+
+If a problem occurs, engineers log in to the server to fix it.
+
+Example website: https://www.facebook.com
+
+Connection details:
+
+Protocol: HTTPS
+
+Port: 443
+
+IP: Resolved through DNS
+
+Username & Password: Authentication.
+
+
+SSH (Secure Shell):
+====================
+
+SSH is used to log in to remote servers securely.
+
+Details:
+
+Protocol: SSH
+
+Port: 22
+
+Requirements:
+
+IP Address  Username
+
+Password or Private Key
+
+
+Firewall:  A firewall checks incoming and outgoing traffic.
+=========
+
+Inbound Traffic: Incoming traffic to the server.
+
+Example:
+
+Port 22
+
+IP 103.149.59.114
+
+Outbound Traffic: Traffic going out from the server.
+
+
+Authentication:  Authentication methods are categorized into three types:
+===== ========   
+
+1. What you know
+
+Username & Password
+
+2. What you have
+
+Keys,  Tokens,  RSA Token,  Authentication devices.
+
+3. What you are
+
+Fingerprint, Retina scan, Palm scan, Face recognition
+
+Server can also be called: Server / Box / Node.
+
+
+Public and Private Keys:
+============= =========
+
+Example analogy:
+
+Lock = Public Key
+Key = Private Key
+
+Key pairs consist of:
+
+Public Key & Private Key.
+
+
+Git Bash:
+========== 
+
+Git Bash is a mini Linux environment for Windows.
+
+It is used as an SSH client.
+
+Examples of SSH clients:
+
+Git Bash, PuTTY,  Super PuTTY,  MobaXterm, Mac Terminal,   Windows CMD.
+
+
+Clients and Servers:
+=== ===================
+
+Browser → HTTP/HTTPS Client
+
+Linux Server → SSH Server
+
+Basic Linux Commands:
+================ ===
+
+Check current directory: pwd  (Present Working Directory)
+
+User Directory:
+
+Windows format:C:\Users\siva
+Linux format:/c/Users/siva
+
+
+Case Sensitivity:
+====================
+
+Windows
+
+Not case-sensitive: Siva == siva == SIVA
+
+Linux
+
+Case-sensitive:Siva ≠ siva  (Spaces are usually avoided in Linux file names.)
+
+
+Path Examples:
+=============
+
+Linux style:
+
+/c/devops/daws-84s
+
+Windows style:
+
+C:\devops\daws-84s
+
+
+Creating SSH Key
+
+Command:
+
+ssh-keygen -f <file-name>
+
+Example:
+
+ssh-keygen -f daws-84s (This generates:Public Key   Private Key)
+
+
+Steps to Create a Server in AWS:
+=========== ===================
+
+1.Create a key pair
+
+2.Create a firewall (security group)
+
+3.Import public key to AWS
+
+4.Create a server (EC2 instance) and attach the public key
+
+5.Attach the firewall to the server
+
+
+AWS Setup:
+===========
+
+Login to AWS
+
+Select region:
+
+us-east-1
+
+Open SSH access:
+
+0.0.0.0/0
+
+Example connection details:
+
+IP: 98.81.70.98  Port: 22  User: ec2-user  Private key
+
+SSH command:
+
+ssh -i private-key ec2-user@ip
+
+
+Operating Systems:
+
+Examples of OS:
+
+RedHat, Ubuntu,  CentOS,  Fedora,  SUSE.
+
+Oracle Linux  Amazon Linux  Debian  Rocky Linux  Kali Linux   Solaris.
+
+
+Is Linux an OS?
+
+Linux is not a full OS.
+Linux is a Kernel.
+
+Kernel
+
+Kernel is the heart and brain of the operating system.
+
+It helps the OS interact with hardware.
+
+Formula:
+
+Kernel + User Interface = Operating System
+
+
+Examples:
+
+RedHat OS:
+
+Linux Kernel + User Interface = RedHat OS
+
+Debian OS:
+
+Linux Kernel + User Interface = Debian
+
+
+Linux Distributions
+
+About 99.9% of Linux distributions are similar.
+
+Examples:
+
+RHEL
+
+Amazon Linux
+
+CentOS
+
+Fedora
+
+Rocky Linux
+
+AlmaLinux
+
+
+RedHat:
+=======
+
+RedHat provides:
+
+Open source code
+
+Enterprise support
+
+Example:
+
+RHEL (RedHat Enterprise Linux)
+
+Linux Command Structure:
+==============================
+General syntax:
+
+command <options> <inputs>
+
+Example:
+
+uname -a
+
+Shows Linux system details.
+
+Show current directory: pwd
+
+Change directory: cd
+
+Go one directory back: cd ..
+
+List files and directories: ls
+
+
+
+
+
+
+
+
+
+
+
