@@ -1,0 +1,585 @@
+
+Before we start DevOps, let me ask you one question.
+
+How many of you use applications like: Amazon  Swiggy  Instagram  WhatsApp"
+
+"These companies update their applications very frequently.
+
+Sometimes you see: New features, Bug fixes, UI changes
+
+Have you ever wondered how companies release software so fast?
+
+That is where DevOps comes into the picture."
+
+
+"Before DevOps, we must understand how software is developed:
+
+This process is called SDLC. SDLC means: Software Development Life Cycle."
+
+Requirement → Design → Development → Testing → Deployment → Maintenance
+
+Requirement:Customer tells what they want. ex: "Build a School Management System." --student records,exams,marks,attaendence, fees.
+
+Design :  Architects design: Database  UI  System architectu.
+
+Development : Developers write code.
+
+Testing: Testers find bugs.
+
+Deployment: Application goes live.
+
+Maintenance: Fix bugs and add new features.
+
+
+3️.Waterfall Model:
+==================
+Earlier software was developed using Waterfall Model.
+
+"In Waterfall, each phase must be completed fully before moving to the next phase."
+
+Example timeline:
+
+Requirement → 3 months
+Design → 3 months
+Development → 8 months
+Testing → 6 months
+Deployment → 4 months
+
+Total → 2 years."
+
+"If after 2 years the customer says:  'I want a new feature.'
+
+What will happen?"
+
+"Everything must be redesigned. Very expensive."
+
+example: 100 defects during testing
+           20 invalid defects
+		   
+Key points:
+
+No going back easily
+
+Changes are difficult
+
+Everything is planned at the beginning.
+
+
+
+4.Agile Model :
+===============
+"So companies moved to Agile Model."
+
+"Instead of building software for 2 years, we divide work into small cycles called Sprints."
+
+Sprint duration: 2 weeks
+
+Sprint process:  Plan  Develop  Test  Deploy
+
+Example: E-commars site like meesho
+
+Sprint 1 → Login feature
+Sprint 2 → Orders feature
+Sprint 3 → Payments
+
+
+Advantages:
+
+✔ Faster delivery
+✔ Customer feedback early
+✔ Less risk
+
+
+Waterfall
+1000 tests → 100 defects
+
+Agile
+100 tests → 3 defects
+
+But Agile still has one problem: 
+
+"Developers write code fast…  But deployment is still slow."
+
+Then introduce DevOps.
+
+
+5.DevOps Concept:
+=================
+
+Dev + Ops = DevOps
+
+Explain:
+
+Developers write code.
+
+Operations team deploys and manages servers.
+
+Earlier problem:
+
+Developer → "My code works"
+Operations → "Application not working" -- No collaboration.
+
+DevOps solves this.
+
+"DevOps is a culture and practice that combines Development and Operations to deliver software faster 
+using automation."
+
+Continuous Integration
+Continuous Delivery
+Continuous Deployment
+Continuous Testing
+Automation
+
+Developer writes code
+↓
+Push to Git
+↓
+Jenkins builds code
+↓
+Automated testing
+↓
+Docker image created
+↓
+Deploy to Kubernetes
+↓
+Application live
+
+
+Example: Earlier deployment time: 6 months
+
+with Devops Deployment time: 10–50 deployments per day.
+
+
+6.DevSecOps:
+===========
+
+"What if we build software fast but security is weak?"
+
+DevSecOps means: Development + Security + Operations
+
+Security integrated in pipeline.
+
+Security tools used:
+--------------------
+SonarQube (code quality)
+
+Trivy (container scanning)
+
+OWASP checks
+
+SAST / DAST
+
+Example:
+Code → Scan vulnerabilities → Build → Deploy
+
+
+AIOps (Add this small explanation):
+==================================
+AIOps
+
+AIOps = Artificial Intelligence for IT Operations
+
+AI is used for:
+
+Log analysis
+
+Anomaly detection
+
+Predicting failures
+
+Automated incident response
+
+Example tools:
+
+Dynatrace
+
+Datadog
+
+Splunk AI
+
+
+DevOps Tools Overview:
+======================
+
+DevOps uses many tools.
+
+Git → Version Control --> Stores source code.
+
+Jenkins → CI/CD --> Automates build and deployment.
+
+Maven --> Build tool for Java projects.
+
+Docker --> Creates containers.
+
+Kubernetes --> Manages containers at scale.
+
+Terraform --> Infrastructure as Code.
+
+Ansible --> Configuration management.
+
+Prometheus + Grafana --> Monitoring.
+
+
+8.AWS + DevOps Pipeline:
+=========================
+Explain how cloud integrates.
+
+Example architecture:
+
+User
+↓
+Internet
+↓
+AWS Load Balancer
+↓
+EC2 / Kubernetes
+↓
+Database
+
+
+Full DevOps pipeline:
+====================
+
+Developer
+↓
+GitHub
+↓
+Jenkins
+↓
+Maven Build
+↓
+Docker Image
+↓
+Push to AWS ECR
+↓
+Deploy to EKS
+↓
+Monitor using Prometheus + Grafana
+
+"This is how modern companies deliver software continuously."
+
+
+Demo-closing:
+=============
+"In this course you will learn:
+
+Linux
+
+Git
+
+Jenkins
+
+Docker
+
+Kubernetes
+
+Terraform
+
+AWS
+
+DevSecOps tools
+
+And finally you will build real industry DevOps pipelines."
+
+Projects: Roboshop- project
+============================
+
+
+
+
+SMS --> School management system
+Examination system
+
+Stakeholders -50 years back
+=============
+Parents
+Students
+Teachers
+
+
+Gurukuls --> waterfall(legacy model)
+------------
+year end exam
+pass percentage --> 40%
+
+DAY-1
+Students --> Not serious
+Teachers --> Not serious
+Parents --> Yes
+
+More exams --> process change
+
+UNIT-TEST - I, II, III, Quarterly, IV, Half yearly, grand test
+
+DAY-30
+=======
+students --> No serious
+teachers --> serious
+parents --> serious
+
+90%
+
+slip test --> daily test
+========================
+99%
+
+students --> serious
+teachers --> serious
+parents --> serious
+
+
+DevOps is the process of building, deploying and testing the code written by developer on the same day instead of doing after complete development.. 
+we can acheive this using continous integration, continous deployment, continous delivery and continous testing. 
+We can do faster releases with less defect using DevOps... basically automation mindset to get the best results.
+
+DEV, QA, SIT, UAT, PERF, PRE-PROD, PROD
+
+min 2, max any number
+
+Linux --> Linus torvalds
+=================
+UNIX --> Hardware and Software(Unix OS) together
+CPU, RAM, Hard Disk, OS(Software)
+Laptop --> IBM BIOS
+
+Linux --> from the sratch using C language based on unix principles. He invented git to store this
+
+windows
+-----------
+not open source
+costly
+not secure must install anti virus
+slow
+too many graphics
+frequent restarts
+tough to update/upgrade
+
+Linux --> less memory
+Secure
+high speed --> mostly text
+no need of restarts
+install or update packages is easy
+free, community support
+low resources
+
+
+Devops Tools & Syllabus:
+========================
+
+1️.Linux Fundamentals (Foundation):
+--------------------------------------
+
+Linux architecture
+
+File & directory management
+
+Permissions & ownership
+
+Users & groups
+
+Package management (yum/apt)
+
+Process & service management
+
+Networking basics
+
+Shell scripting (bash)
+
+2.Networking Basics
+========================
+
+OSI & TCP/IP models
+
+IP addressing, CIDR
+
+DNS, DHCP
+
+Ports & protocols (HTTP, HTTPS, SSH)
+
+Load balancing concepts
+
+Firewalls & security groups
+
+
+3.Git & Version Control
+==============================
+
+Git architecture
+
+Git init, clone, add, commit, push, pull
+
+Branching strategies (feature, dev, main)
+
+Merge vs Rebase
+
+GitHub / GitLab workflows
+
+Pull / Merge Requests.
+
+
+4.Configuration Management:
+===========================
+
+Ansible architecture
+
+Inventory
+
+Playbooks
+
+Roles
+
+Variables & vault
+
+Ansible + AWS
+
+Ansible + Docker
+
+
+5.Infrastructure as Code (IaC):
+================================
+Terraform
+
+Providers
+
+Resources
+
+Variables & outputs
+
+State file
+
+Remote backend (S3 + DynamoDB)
+
+Modules (real-time use)
+
+Workspaces
+
+
+
+6.Build Tools:
+========================
+
+Maven (very important)
+
+POM.xml
+
+Build lifecycle
+
+Gradle (basic)
+
+Artifact repositories (Nexus / Artifactory)
+
+
+7.CI/CD – Jenkins:
+====================
+
+Jenkins architecture
+
+Freestyle vs Pipeline jobs
+
+Jenkinsfile (Declarative & Scripted)
+
+Webhooks
+
+Credentials management
+
+Jenkins + Git + Maven
+
+Jenkins + Docker + AWS
+
+
+
+8.Containers – Docker:
+========================
+
+Docker architecture
+
+Images & containers
+
+Dockerfile
+
+Volumes & networking
+
+Docker Compose
+
+Push images to ECR (AWS)
+
+
+9.Container Orchestration – Kubernetes (EKS):
+================================================
+
+Kubernetes architecture
+
+Pods, Deployments, Services
+
+ConfigMaps & Secrets
+
+Ingress
+
+Helm basics
+
+AWS EKS cluster setup
+
+Monitoring Kubernetes apps.
+
+
+
+10.Cloud – AWS Core Services:
+================================
+EC2
+
+Auto Scaling
+
+Load Balancer (ALB, NLB)
+
+Storage
+
+EBS
+
+S3
+
+EFS
+
+Networking
+
+VPC (Very important)
+
+Subnets (public/private)
+
+Route tables
+
+Internet Gateway / NAT Gateway
+
+Security Groups & NACLs
+
+IAM & Security
+IAM & Security
+
+IAM users, roles, policies
+
+MFA
+
+1️1.Monitoring & Logging:
+=====================
+
+Prometheus
+
+Grafana
+
+
+1️2.Security & DevSecOps:
+========================
+
+IAM best practices
+
+Secrets management
+
+Trivy (Docker scanning)
+
+SonarQube
+
+OWASP basics
+
+Secure CI/CD pipelines
+
+
+
