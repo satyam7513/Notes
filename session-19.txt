@@ -1,123 +1,26 @@
+Chinna@70329618
+
+
 DRY --> Don't repeat yourself.
 
-write a seperate file, create functions with all common code,call when required...
+write a seperate file, create functions with all common code, call when required...
+
 
 How to Call Another Script from the Current Script?
 =====  ===============  =======================
 
-We have two scripts:
-
-script-1.sh
-
-script-2.sh
-
-There are two ways to call one script from another script.
-
-1️.Using ./script-2.sh (or bash script-2.sh)
-2️.Using source script-2.sh
-
-Method 1: Using ./script-2.sh:
-
-script-1.sh
-
-#!/bin/bash
-GREETING="Hello, Good Morning"
-echo "$GREETING"
-
-echo "PID of SCRIPT-1: $$" #$$-pid of the current running script.
-./script-2.sh
-
-
-script-2.sh
-#!/bin/bash
-
-echo "PID of SCRIPT-2: $$"
-
-echo "$GREETING"
-Give execute permission
-chmod +x script-1.sh script-2.sh
-
-Run: ./script-1.sh
-
-Output Example:
-=============
-Hello, Good Morning
-PID of SCRIPT-1: 1751
-PID of SCRIPT-2: 1752
-
-Explanation
-
-When we use:
-
-./script-2.sh
-
-script-2 runs in a new shell (child process)
-
-PID will be different.
-
-script-2 cannot access variables from script-1
-
-So $GREETING may not be available in script-2.
-
-
-Method 2: Using source script-2.sh
-========== =====================
-
-script-1.sh
-
-#!/bin/bash
-
-GREETING="Hello, Good Morning"
-
-echo "$GREETING"
-echo "PID of SCRIPT-1: $$"
-
-source ./script-2.sh
-
-
-script-2.sh
-
-#!/bin/bash
-
-echo "PID of SCRIPT-2: $$"
-
-echo "$GREETING"
-
-Run: sh script-1.sh
-
-Output Example:
-==== =========
-Hello, Good Morning
-PID of SCRIPT-1: 1788
-PID of SCRIPT-2: 1788
-Hello, Good Morning
-
-
-Explanation:
-============
-When we use:
-
-source script-2.sh
-
-script-2 runs in the same shell
-
-PID will be the same
-
-script-2 can access variables from script-1
-
-So $GREETING is available in script-2.
-
-Final Summary:
-
-   Method	                 PID	                             Variable Access
- ./script-2.sh	          Different	                          Cannot access script-1 variables
- source script-2.sh	        Same                              Can access script-1 variables
+| Method             | What Happens           | Variable Access |
+| ------------------ | ---------------------- | --------------- |
+| `./script.sh`      | New shell (new room)   | ❌ No            |
+| `source script.sh` | Same shell (same room) | ✅ Yes           |
 
 
 
 Code is repeted into all the catagories. so we can write one common script:
 we are creating common.sh:
 === ================ ========
+common.sh:
+=========
 #!/bin/bash
 
 START_TIME=$(date +%s)
@@ -194,11 +97,12 @@ VALIDATE $? "Restarting MongoDB"
 print_time
 
 
-
 catalogue.sh:
 =============
 common.sh:
 ---------
+SCRIPT_DIR=$PWD --> you must mention.
+
 app_setup(){
     id roboshop &>>$LOG_FILE
     if [ $? -ne 0 ]
@@ -267,16 +171,327 @@ cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
 dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "Installing MongoDB Client"
 
-STATUS=$(mongosh --host mongodb.daws84s.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
+STATUS=$(mongosh --host mongodb.kimidi.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
 if [ $STATUS -lt 0 ]
 then
-    mongosh --host mongodb.daws84s.site </app/db/master-data.js &>>$LOG_FILE
+    mongosh --host mongodb.kimidi.site </app/db/master-data.js &>>$LOG_FILE
     VALIDATE $? "Loading data into MongoDB"
 else
     echo -e "Data is already loaded ... $Y SKIPPING $N"
 fi
 
 print_time
+
+
+
+frontend.sh:
+========== ======== 
+#!/bin/bash
+
+source ./common.sh
+check_root
+
+dnf module disable nginx -y &>>$LOG_FILE
+VALIDATE $? "Disabling default nginx"
+
+dnf module enable nginx:1.24 -y &>>$LOG_FILE
+VALIDATE $? "Enabling Nginx:1.24"
+
+dnf install nginx -y &>>$LOG_FILE
+VALIDATE $? "Installing Nginx"
+
+systemctl enable nginx  &>>$LOG_FILE
+systemctl start nginx 
+VALIDATE $? "Starting Nginx"
+
+rm -rf /usr/share/nginx/html/* &>>$LOG_FILE
+VALIDATE $? "Removing default content"
+
+curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip &>>$LOG_FILE
+VALIDATE $? "Downloading frontend"
+
+cd /usr/share/nginx/html 
+unzip /tmp/frontend.zip &>>$LOG_FILE
+VALIDATE $? "unzipping frontend"
+
+rm -rf /etc/nginx/nginx.conf &>>$LOG_FILE
+VALIDATE $? "Remove default nginx conf"
+
+cp $SCRIPT_DIR/nginx.conf /etc/nginx/nginx.conf
+VALIDATE $? "Copying nginx.conf"
+
+systemctl restart nginx 
+VALIDATE $? "Restarting nginx"
+
+print_time
+
+nginx.conf:
+===== ==== 
+same code copy here (Shell-roboshop in Nginx)
+
+
+Redis.sh:
+=========
+#!/bin/bash
+
+source ./common.sh
+app_name=redis
+
+dnf module disable redis -y &>>$LOG_FILE
+VALIDATE $? "Disabling Default Redis version"
+
+dnf module enable redis:7 -y &>>$LOG_FILE
+VALIDATE $? "Enabling Redis:7"
+
+dnf install redis -y &>>$LOG_FILE
+VALIDATE $? "Installing Redis"
+
+sed -i -e 's/127.0.0.1/0.0.0.0/g' -e '/protected-mode/ c protected-mode no' /etc/redis/redis.conf
+VALIDATE $? "Edited redis.conf to accept remote connections"
+
+systemctl enable redis &>>$LOG_FILE
+VALIDATE $? "Enabling Redis"
+
+systemctl start redis  &>>$LOG_FILE
+VALIDATE $? "Started Redis"
+
+print_time
+
+
+user.sh:
+=====================
+#!/bin/bash
+
+source ./common.sh
+app_name=user
+
+check_root
+app_setup
+nodejs_setup
+systemd_setup
+print_time
+
+user.service --> same code copy here(Shell-roboshop in user.service)
+
+
+Cart.sh:
+=== ====
+#!/bin/bash
+
+source ./common.sh
+app_name=cart
+
+check_root
+app_setup
+nodejs_setup
+systemd_setup
+print_time
+
+cart.service --> same code copy here (IN shell-roboshop)
+
+MySql.sh:
+=========
+#!/bin/bash
+
+source ./common.sh
+app_name=mysql
+check_root
+
+echo "please enter root password"
+read -s MYSQL_ROOT_PASSWORD
+
+dnf install mysql-server -y &>>$LOG_FILE
+VALIDATE $? "Installing MySQL server"
+
+systemctl enable mysqld &>>$LOG_FILE
+VALIDATE $? "Enabling MySQL"
+
+systemctl start mysqld   &>>$LOG_FILE
+VALIDATE $? "Starting MySQL"
+
+mysql_secure_installation --set-root-pass $MYSQL_ROOT_PASSWORD &>>$LOG_FILE
+VALIDATE $? "Setting MySQL root password"
+
+print_time
+
+
+shipping
+=========== ==================================================
+common.sh:
+========
+maven_setup(){
+    dnf install maven -y &>>$LOG_FILE
+    VALIDATE $? "Installing Maven and Java"
+
+    mvn clean package  &>>$LOG_FILE
+    VALIDATE $? "Packaging the shipping application"
+
+    mv target/shipping-1.0.jar shipping.jar  &>>$LOG_FILE
+    VALIDATE $? "Moving and renaming Jar file"
+}
+
+
+shipping.sh:
+============
+#!/bin/bash
+
+source ./common.sh
+app_name=shipping
+
+check_root
+echo "Please enter root password to setup"
+read -s MYSQL_ROOT_PASSWORD
+
+app_setup
+maven_setup
+systemd_setup
+
+dnf install mysql -y &>>$LOG_FILE
+VALIDATE $? "Installing MYSQL"
+
+mysql -h mysql.kimidi.site -u root -p$MYSQL_ROOT_PASSWORD -e 'use cities' &>>$LOG_FILE
+if [ $? -ne 0 ]
+then
+    mysql -h mysql.kimidi.site -uroot -p$MYSQL_ROOT_PASSWORD < /app/db/schema.sql &>>$LOG_FILE &>>$LOG_FILE
+    mysql -h mysql.kimidi.site -uroot -p$MYSQL_ROOT_PASSWORD < /app/db/app-user.sql  &>>$LOG_FILE &>>$LOG_FILE
+    mysql -h mysql.kimidi.site -uroot -p$MYSQL_ROOT_PASSWORD < /app/db/master-data.sql &>>$LOG_FILE &>>$LOG_FILE
+    VALIDATE $? "Loading data into MySQL"
+else
+    echo -e "Data is already loaded into MySQL ... $Y SKIPPING $N"
+fi
+
+systemctl restart shipping &>>$LOG_FILE
+VALIDATE $? "Restart shipping"
+
+print_time
+
+shipping.service --> copy same code here.
+
+
+
+RabbitMQ:
+==== ================= ========================
+common.sh
+========
+NO -code changes. 
+
+rabbitmq.sh:
+===========
+#!/bin/bash
+
+source ./common.sh
+app_name=rabbitmq
+
+check_root
+
+echo "Please enter rabbitmq password to setup"
+read -s RABBITMQ_PASSWD
+
+cp rabbitmq.repo /etc/yum.repos.d/rabbitmq.repo
+VALIDATE $? "Adding rabbitmq repo"
+
+dnf install rabbitmq-server -y &>>$LOG_FILE
+VALIDATE $? "Installing rabbitmq server"
+
+systemctl enable rabbitmq-server &>>$LOG_FILE
+VALIDATE $? "Enabling rabbitmq server"
+
+systemctl start rabbitmq-server &>>$LOG_FILE
+VALIDATE $? "Starting rabbitmq server"
+
+rabbitmqctl add_user roboshop $RABBITMQ_PASSWD &>>$LOG_FILE
+rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*" &>>$LOG_FILE
+
+print_time
+
+rabbitmq.repo --> same code copy here.
+
+
+
+Payment:
+=============================================
+common.sh
+==========
+
+python_setup(){
+    dnf install python3 gcc python3-devel -y &>>$LOG_FILE
+    VALIDATE $? "Install Python3 packages"
+
+    pip3 install -r requirements.txt &>>$LOG_FILE
+    VALIDATE $? "Installing dependencies"
+
+    cp $SCRIPT_DIR/payment.service /etc/systemd/system/payment.service &>>$LOG_FILE
+    VALIDATE $? "Copying payment service"
+
+}
+
+payment.sh:
+===========
+#!/bin/bash
+
+source ./common.sh
+app_name=payment
+
+check_root
+app_setup
+python_setup
+systemd_setup
+print_time
+
+payment.service --> same code copy here
+
+
+dispatch:
+============================
+common.sh:
+=========
+golang_setup() {
+      
+    dnf install golang -y &>>$LOG_FILE
+    VALIDATE $? "Installing Golang"
+
+    
+    if [ ! -f go.mod ]; then
+        go mod init $app_name &>>$LOG_FILE
+        VALIDATE $? "Initializing Go Module"
+    fi
+
+    go mod tidy &>>$LOG_FILE
+    VALIDATE $? "Downloading Dependencies"
+
+    go build &>>$LOG_FILE
+    VALIDATE $? "Building $app_name Service"
+}
+
+dispatch.sh
+==========
+#!/bin/bash
+
+source ./common.sh
+app_name=dispatch
+
+check_root
+app_setup
+golang_setup
+systemd_setup
+print_time
+
+dispatch.service --> copy the code in document.
+
+[Unit]
+Description = Dispatch Service
+[Service]
+User=roboshop
+// highlight-start
+Environment=AMQP_HOST=rabbitmq.somaraju.online
+// highlight-end
+Environment=AMQP_USER=roboshop
+Environment=AMQP_PASS=roboshop123
+ExecStart=/app/dispatch
+SyslogIdentifier=dispatch
+
+[Install]
+WantedBy=multi-user.target
 
 
 

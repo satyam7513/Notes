@@ -1,0 +1,141 @@
+What is Ansible? 
+
+“Ansible is a simple, agentless automation tool that helps manage multiple servers efficiently 
+using YAML-based playbooks.”
+
+Ansible is an IT automation tool used for:
+
+Configuration Management
+Application Deployment
+Orchestration
+Provisioning
+
+Key Features:
+=== ========
+Agentless (no installation on target nodes)
+Uses SSH
+YAML-based (easy to read)
+Idempotent (runs safely multiple times)
+
+
+2. Ansible Architecture:
+==== ========== =========
+Components:
+Control Node → Where Ansible is installed
+Managed Nodes → Target servers
+Inventory → List of servers
+Playbook → Automation file (YAML)
+Modules → Actual work (like yum, service)
+
+
+        Control Node
+              |
+     -------------------
+     |        |        |
+   Node1    Node2    Node3
+   
+  
+3. Push vs Pull Model:
+=== =========== =====
+🔸 Push Model (Ansible)
+
+👉 Control node sends instructions to servers.
+
+Control Node  --->  Managed Nodes
+
+Features:
+No agent required
+Immediate execution
+Simple setup
+
+🔸 Pull Model (like Puppet, Chef)
+
+👉 Nodes pull configuration from server.
+
+Managed Nodes  --->  Central Server
+Features:
+Requires agent
+Runs periodically
+More complex setup
+
+
+   
+
+Installation of Ansible:  
+sudo dnf install ansible -y
+(which server we are install ansible is called ansible-server/ control-node)
+create 2 servers
+
+how to connect ansible-server to node:
+
+ansible all -i (second-server-ip), -e ansible_user=ec2-user -e ansible_password=DevOps321 -m ping
+
+i need to install nginx through ansible
+
+ansible all -i ip, -e ansible_user=ec2-user -e ansible_password=DevOps321 -m dnf -a "name=nginx state=installed"
+
+facing the error: run under root user.
+
+so you can add "-b" menas become root user.
+
+ansible all -i ip,-e ansible_user=ec2-user -e ansible_password=DevOps321 -b -m dnf -a "name=nginx state=installed"
+
+start nginx-service
+ansible all -i ip,-e ansible_user=ec2-user -e ansible_password=DevOps321 -b -m service -a "name=nginx state=started"
+
+shell-script=ansible-playbook
+
+YAMl --> yet another markup language (.yml or .yaml)
+
+
+
+sample playbook:
+
+    ---
+	"firstname": "Satyam",
+	"lastname": "k",
+	"dob": "1987-01-01",
+	"addresses": [
+		{
+			"type": "perm",
+			"doorno": "143",
+			"street": "gandi nagar"
+		},
+		{
+			"type": "current",
+			"doorno": "150",
+			"street": "murali nagar"
+		}
+	]
+}
+
+Why does a playbook start with --- ?
+--- indicates the start of a YAML document.
+--- is like a header that tells Ansible: ‘Hey, YAML content starts from here’.”
+
+
+Create one repo in github: Ansible
+after clone the repo.
+create one playbook in Vs-code
+
+01-playbook.yml:
+== ========== ===
+
+## create inventory.ini
+[frontend]
+node-ip
+
+ - name: ping the server
+   hosts:frontend
+   tasks: #list of tasks
+   - name: ping the server
+     ansible.builtin.ping: #check in google ping module
+	 
+ansible-playbook -i inventory.ini -e ansible_user=ec2-user -e ansible_password=DevOps321 01-playbook.yaml	 
+	 
+
+
+
+	
+
+

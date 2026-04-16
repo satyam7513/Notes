@@ -1,0 +1,380 @@
+18.while-loop in shell script:
+== =======
+while [ condition ]
+do
+   echo
+done
+
+#!/bin/bash
+
+# a=0
+
+# while [ $a -lt 10 ]
+# do
+#    echo $a
+#    a=`expr $a + 1`
+# done
+	 
+
+
+Delete-old-Logs:
+== ====== ====
+
+our task: find the log files older then 14 days and delete the files.
+===== ===
+
+how can we search the logs in Linux:
+find . -name "*.log"
+
+14days old log files:
+find <source_directory> -name "*.log" -mtime +14
+
+first we know:
+1.source directory
+2.find the files
+3.delete the files.
+
+first we can create some log files.
+
+mkdir app-logs
+cd app-logs
+
+touch -d 20260101 cart.log
+touch -d 20260101 catalogue.log
+touch -d 20260101 shipping.log
+touch -d 20260101 catalogue.js
+touch -d 20260101 shipping.java
+touch payment.log
+
+find . -name "*.log" -mtime +14
+
+
+18.delete-old-logs.sh:
+==== ====== ============
+#!/bin/bash
+
+USERID=$(id -u)
+R="\e[31m"
+G="\e[32m"
+Y="\e[33m"
+N="\e[0m"
+LOGS_FOLDER="/var/log/shellscript-logs"
+SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
+LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
+SOURCE_DIR=/home/ec2-user/app-logs
+
+mkdir -p $LOGS_FOLDER
+
+if [ $USERID -ne 0 ]
+then
+    echo -e "$R ERROR:: Please run this script with root access $N" | tee -a $LOG_FILE
+    exit 1 #give other than 0 upto 127
+else
+    echo "You are running with root access" | tee -a $LOG_FILE
+fi
+
+# validate functions takes input as exit status, what command they tried to install
+VALIDATE(){
+    if [ $1 -eq 0 ]
+    then
+        echo -e "$2 is ... $G SUCCESS $N" | tee -a $LOG_FILE
+    else
+        echo -e "$2 is ... $R FAILURE $N" | tee -a $LOG_FILE
+        exit 1
+    fi
+}
+
+echo "Script started executing at $(date)" | tee -a $LOG_FILE
+
+FILES_TO_DELETE=$(find $SOURCE_DIR -name "*.log" -mtime +14) ####IFS = Internal Field Separator
+
+while IFS= read -r filepath ###“Read the input line by line, and store each line into a variable called filepath.”
+do
+    echo "Deleting file: $filepath" | tee -a $LOG_FILE
+    rm -rf $filepath
+done <<< $FILES_TO_DELETE
+
+echo "Script executed successfully"
+
+
+What is filepath?
+filepath is just a variable name
+It stores one line at a time from input
+Example:
+
+If input is:
+
+/home/ec2-user/app-logs/app1.log
+/home/ec2-user/app-logs/app2.log
+
+Then loop runs like:
+
+Iteration	filepath value
+1	/home/.../app1.log
+2	/home/.../app2.log
+
+👉 So filepath = path of each file.
+
+
+Flow:
+
+done <<< $FILES_TO_DELETE  ###This is called a “here string” in Bash.
+
+$FILES_TO_DELETE contains list of files
+<<< sends that list as input
+read reads one line at a time
+Each line → stored in filepath
+
+
+Task:
+===== ====
+backup.sh:
+================
+14 days old-log files can be zipped and placed into destnation directory.... 
+storage team usually monitors the destination directory.
+if they find any files they move to another server.
+
+requirements:
+==== ======
+source directory
+destination directory
+
+Need to check source directory exist or not.
+destination directory also should be checked.
+find the files.
+ZIP the files.
+Move to Destiantion Directory.
+then Remove the files in source directory.
+
+1. create 2 directories.
+mkdir source-dir
+mkdir dest-dir
+
+we don't have to hardcode the script.then we pass like
+
+sh backup.sh <source_directory> <destination-directory> <days>
+
+backup.sh:
+=== ======
+#!/bin/bash
+
+USERID=$(id -u)
+SOURCE_DIR=$1
+DEST_DIR=$2
+DAYS=${3:-14} #if days are provided that will be considered, otherwise default 14 days considered.
+
+LOGS_FOLDER="/var/log/shellscript-logs"
+SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
+LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
+R="\e[31m"
+G="\e[32m"
+Y="\e[33m"
+N="\e[0m"
+
+mkdir -p $LOGS_FOLDER
+
+if [ $USERID -ne 0 ]
+then
+    echo -e "$R ERROR:: Please run this script with root access $N" | tee -a $LOG_FILE
+    exit 1 #give other than 0 upto 127
+else
+    echo "You are running with root access" | tee -a $LOG_FILE
+fi
+
+# validate functions takes input as exit status, what command they tried to install
+VALIDATE(){
+    if [ $1 -eq 0 ]
+    then
+        echo -e "$2 is ... $G SUCCESS $N" | tee -a $LOG_FILE
+    else
+        echo -e "$2 is ... $R FAILURE $N" | tee -a $LOG_FILE
+        exit 1
+    fi
+}
+
+USAGE(){
+     echo -e "$R USAGE:: $N sh 20-backup.sh <source-dir> <destination-dir> <days>"
+}
+
+
+if [ $# -lt 2 ] ##number of arguments 2 passed.
+then
+   USAGE
+fi
+
+##check if directoriey exist or not in shell-script
+
+if [ ! -d $SOURCE_DIR ]
+then
+   echo -e "$R $SOURCE_DIR does not exist. please check $N"
+   exit 1
+fi
+
+if [ ! -d $DEST_DIR ]
+   echo -e "$R $DEST_DIR does not exist. please check $N"
+   exit 1
+fi
+
+FILES=$(find $SOURCE_DIR -name "*.log" -mtime +$DAYS)
+
+
+#### touch -d 20240101 ../source-dir/cart.log
+
+####find ../source-dir/ -name "*.log" -mtime +14 (check cart.log exist or not)
+
+after git pull
+
+sudo sh 20.backup.sh /home/ec2-user/source-dir/ /home/ec2-user/dest-dir/
+
+
+
+check the time stamp $date
+
+date +%F-%H --> hours
+date +%F-%H-%M --> miniutes
+date +%F-%H-%M-%S --> seconds
+
+
+if [ ! -z "$FILES" ]
+then
+echo "Files to zip are: $FILES"
+TIMESTAMP=$(date +%F-%H-%M-%S)
+ZIP_FILE="$DEST_DIR/app-logs-$TIMESTAMP.zip"
+find $SOURCE_DIR -name "*.log" -mtime +$DAYS | zip -@ "$ZIP_FILE"
+ 
+
+##now we can Zip the files.
+
+## check zip command is availible or not.
+if zip not availible then install 
+## sudo dnf install zip -y
+
+if [ -f $ZIP_FILE ]
+then
+  echo -e "sucessfully created zip file"
+else
+  echo -e "zip file creation ... $R failure $N"
+  exit 1
+fi
+
+## we can remove the files in source-directory
+
+	while IFS=read -r filepath
+	do
+	  echo "Deleting file: $filepath" | tee -a $LOG_FILE
+	  rm -rf $filepath
+	 done <<< $FILES
+     echo -e "Log files older than $DAYS from source directory removed...$G sucees $N"
+	 
+##we can create the cart.log in source-dir.
+
+we can check the file:
+cd source-dir/ --> ls -l
+cart.log file availible
+
+after run the script cart.log willnot be availible in source-dir.
+
+git pull
+
+sudo sh 20-backup.sh /home/ec2-user/source-dir/ /home/ec2-user/dest-dir/
+
+check with source-dir
+cd ../source-dir/
+ls -l --> 0 files
+
+cd dest-dir/
+ls -l
+show the zip-files.
+
+ 
+
+
+crontab --> 
+============== =====
+scheduling the scripts in linux --> 
+usually non business hours at 3 or 4AM
+
+
+crontab guru  -->goto this website.
+
+crontab -e --> You can add, modify, or delete scheduled tasks.
+
+* * * * * echo "Hello crontab"
+
+cd /var/log/
+sudo tail -f cron --> check the timing every minitue job scedule.
+
+we can create 2 files in source-dir:
+touch -d 20260101 cart.log shipping.log
+
+crontab -l --> Displays all scheduled cron jobs for the current user
+
+* * * * * sudo sh /home/ec2user/shell-practice/20-backup.sh /home/ec2-user/source-dir/ /home/ec2-user/dest-dir/
+
+cd /dest-dir/
+
+crontab -e
+
+* * * * * echo "Hello crontab"
+* * * * * sudo sh /home/ec2user/shell-practice/20-backup.sh /home/ec2-user/source-dir/ /home/ec2-user/dest-dir/
+:wq
+
+sudo tail -f /var/log/cron --> check the jobs-scheduling time.
+
+
+send email/gmail from linux:
+======= ======== ==========
+concepts/sending-gmail-from-linux
+
+df -ht --> memroy reached use% 70%-youget a alert mail.
+
+sudo dnf install msmtp -y
+
+https://myaccount.google.com/apppasswords (create app password)
+
+app-password: umyy xxqn uwts deng (using above link)
+
+sudo vi /etc/msmtprc
+
+defaults
+auth           on
+tls            on
+tls_trust_file /etc/ssl/certs/ca-bundle.crt
+logfile        /var/log/msmtp.log
+
+account        gmail
+host           smtp.gmail.com
+port           587
+from           ksnaidudba@gmail.com
+user           ksnaidudba@gmail.com
+password       umyyxxqnuwtsdeng
+
+account default : gmail
+
+give some security permissions:
+sudo chmod 644 /etc/msmtprc
+
+cerate log file:
+sudo touch /var/log/msmtp.log
+sudo chmod 666 /var/log/msmtp.log
+
+Test as Any User:
+
+{
+echo "To: satyamknaidu@gmail.com"
+echo "Subject: Testing Gmail"
+echo "Content-Type: text/html"
+echo ""
+echo Testing Gmail Body"
+} | msmtp "satyamknaidu@gmail.com"
+
+we can check mail is recieved or not.
+
+
+{
+echo "To: satyamknaidu@gmail.com"
+echo "Subject: Testing gmail"
+echo "Content-Type: text/html"
+echo ""
+echo "tesitng gmail "
+} | msmtp "satyamknaidu@gmail.com"

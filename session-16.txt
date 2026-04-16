@@ -235,6 +235,7 @@ for(int i=0; i<=100; i++){
 General we are writing this script.
 
 shell scripting we are writing like this way:
+
 15.For-loop.sh:
 =================== 
 
@@ -377,8 +378,47 @@ Default region name [None]: us-east-1
 Default output format [None]:
  		  
  aws s3 ls --> just check working or not, no o/p also fine except error		
+ I can acess aws-cli now what can i do now? aws-cli i have policy like administrator access, so
+ i can create update delete services, i can create instnaces, Route-53 record using aws-cli.
+ 
+ 1. create instances
+	AMI ID, SG ID, SUBNET ID...
+	
+Goto google and search: aws cli to create ec2 and get ip address.
+==============================================================
+see the code.
 
-aws ec2 run-instances --image-id ami-09c813fb71547fc4f --instance-type t2.micro --security-group-ids sg-01bc7ebe005fb1cb2 --tag-specifications "ResourceType=instance,Tags=[{Key=Name, Value=test}]" --query "Instances[0].PrivateIpAddress" --output text
+aws ec2 run-instances --image-id ami-09c813fb71547fc4f --instance-type t3.micro --security-group-ids sg-01bc7ebe005fb1cb2 --tag-specifications "ResourceType=instance,Tags=[{Key=Name, Value=test}]" --query "Instances[0].PrivateIpAddress" --output text
 
 
-aws ec2 describe-instances --instance-ids i-0abcdef123456789 --query "Reservations[0].Instances[0].PrivateIpAddress" --output text
+Instance is created but public-ip is not availible take some time.
+
+aws ec2 run-instances \
+--image-id ami-0220d79f3f480ecf5 \
+--instance-type t3.micro \
+--security-group-ids sg-02b2c0c8175091ab8 \
+--tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=test}]" \
+--query "Instances[0].PrivateIpAddress" \
+--output text
+
+you see private-Ip.
+
+Instance is created but public-ip is not availible take some time.
+
+aws ec2 run-instances \
+--image-id ami-0220d79f3f480ecf5 \
+--instance-type t3.micro \
+--security-group-ids sg-0d33396b3a43651ba \
+--tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=test}]" \
+--query "Instances[0].PrivateIpAddress" \
+--output text
+
+
+you get the instanc-id and use this query after we get the public-ip.
+it is in json format so we use this one.
+
+
+aws ec2 describe-instances \
+    --instance-ids i-0771eb72fd8d2b07d \
+    --query 'Reservations[*].Instances[0].PublicIpAddress' \
+    --output text

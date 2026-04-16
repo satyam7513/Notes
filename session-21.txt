@@ -1,0 +1,194 @@
+This is a Bash script to monitor disk usage on a system.
+If any disk partition crosses a defined threshold, it sends an alert email.
+
+
+df -hT
+df -hT | awk '{print $6F}' ---> shows only use%.
+
+df -hT | grep -v Filessystem | awk '{print $7F}' --> removes the header line.
+
+#!/bin/bash
+
+DISK_USSAGE=(df -hT | grep -v Filessystem) ##df -hT → shows disk usage in human-readable format + filesystem type
+                                           ##grep -v Filesystem → removes the header line
+DISK_THRESHOLD=1 # In project it willbe 75%, Minimum usage % to trigger alert.
+MSG=""  
+IP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)##IP → fetches instance private IP (works in AWS EC2)
+while IFS=read line  #Reads each line from DISK_USAGE
+do
+   USAGE=$(echo $line | awk '{print $6F}' | cut -d "%" -f1) ##$6 → usage column (e.g., 75%)
+   PARTITION=$(echo $line | awk '{print $7F}') ##$7 → mount point (e.g., /)
+   if [ $USAGE -ge $DISK_THRESHOLD ] ###If usage ≥ threshold → trigger alert
+   then
+      MSG+="High Disk Usage on $PARTITION: $USAGE %<br>"  #<br> represents HTML new line #Adds message in HTML format
+	 #MSG+="High Disk Usage on $PARTITION: $USAGE % \n" #terminal print as text.
+	fi
+done <<< $DISK_USSAGE
+
+####sh mail.sh "DevOps Team" "High Disk Usage" "$IP" "$MSG" "satymknaidu@gmail.com" "ALERT-High Disk Usage"
+
+Example:
+
+Hi DevOps Team,
+
+There is High Disk Usage alert in the system. Please check
+
+High Disk Usage on /run: 2
+High Disk Usage on /: 30
+High Disk Usage on /var: 22
+High Disk Usage on /var/tmp: 3
+High Disk Usage on /home: 5
+High Disk Usage on /var/log: 4
+High Disk Usage on /boot: 53
+High Disk Usage on /boot/efi: 6
+High Disk Usage on /var/log/audit: 2
+
+Regards,
+Monitoring Team.
+
+
+
+cpu utilization in shell script (Googlesearch):
+===== ======================= ===================
+
+#!/bin/bash
+
+while true;  ###Runs forever (continuous monitoring),Stops only if you press:ctrl+c
+do
+  cpu_usage=$(top -b -n2 -p 1 | fgrep "Cpu(s)" | tail -1 | awk -F'id,' -v prefix="$prefix" '{ split($1, vs, ","); v=vs[length(vs)]; sub("%", "", v); printf "%s%.1f%%\n", prefix, 100 - v }')
+  echo "CPU Usage: ${cpu_usage}"
+  sleep 1
+done
+
+###top -b -n2 -p 1
+-b → batch mode (no UI, script-friendly)
+-n2 → run 2 times  ###👉 Why 2 times? First output is often inaccurate
+                       Second output is used for correct CPU values
+-p 1 → monitor process ID 1 (init/systemd)
+
+fgrep "Cpu(s)": Filter CPU line.
+
+tail -1 --> Take latest value, Takes the second (latest) CPU reading
+
+###awk -F'id,' '{ split($1, vs, ","); v=vs[length(vs)]; sub("%", "", v); printf "%.1f%%\n", 100 - v }'
+## Splits line using id,
+##Extracts idle percentage Removes % Calculates
+##-v prefix="$prefix" --This variable is not defined anywhere, It has no effect → can be removed
+echo "CPU Usage: ${cpu_usage}" --> . Print CPU usage
+
+sleep 1--> Script pauses for 1 second before next check
+
+
+How to test if script is really working?
+
+Run this command in another terminal:
+yes > /dev/null &    --> This creates CPU stress
+
+Now run the script : sh 22-cpu-usage.sh
+now check your script output: like this
+CPU Usage: 80.0%
+CPU Usage: 95.0%
+CPU Usage: 70.0%
+
+stop the Test:
+killall yes
+
+
+🔹 1. What is Crontab?
+Crontab is a Linux utility used to schedule tasks automatically at specific times.
+
+crontab guru  -->goto this website.
+
+crontab -l :View crontab
+crontab -e : Edit crontab
+crontab -r : remove crontab
+
+
+* * * * * echo "Hello crontab"
+
+cd /var/log/
+
+sudo tail -f cron --> check the timing every minitue job scedule.
+
+
+
+
+
+Configuration Management:
+=== ============ ==========
+Configuration Management means:
+
+Automatically setting up and maintaining servers in a consistent way.
+
+1. Server Provisioning (Initial Setup)
+
+When we get a new server, we need to prepare it.
+
+Steps:
+Install system packages (like git, wget, etc.)
+Install programming runtime (Java, Python, Node.js)
+Create folders and users for the application
+Download application code
+Install required dependencies
+Create service files (to run app as a service)
+Start the application/server
+
+👉 In short:
+Prepare server → Install everything → Run application.
+
+2. Deployment (Updating Application)
+
+When a new version of the app comes:
+
+Steps:
+Stop the running application
+Remove old version
+Download new version
+Install dependencies (if needed)
+Start the application again
+
+👉 In short:
+Stop → Update → Start
+
+
+
+⚠️ Problems with Shell Scripts:
+=== =============== ===========
+
+Before tools like Ansible, people used shell scripts.
+
+❌ Disadvantages:
+=== ==== =========
+Not Idempotent
+→ Running script again may break things or repeat tasks unnecessarily
+Poor Error Handling
+→ Hard to track where it failed
+Not Scalable
+→ Difficult to manage multiple servers
+Not Flexible (OS dependent)
+→ Works only on specific Linux distributions
+Complex Syntax
+→ Hard for beginners to understand
+Security Issues
+→ Passwords may be exposed in scripts
+
+🛠️ Configuration Management Tools
+
+To solve these problems, we use tools like:
+
+* Ansible , * chef, *puppet , * Rundeck
+
+🎯 Why Use These Tools?
+
+✅ Automation (no manual work)
+✅ Idempotent (safe to run multiple times)
+✅ Scalable (manage 100+ servers easily)
+✅ Better security
+✅ Easy to maintain
+
+example:
+========
+👉 “Imagine you have 50 servers. Do you want to log in to each server and install software manually?”
+No
+
+Configuration management tools like Ansible do this automatically for all servers at once.”

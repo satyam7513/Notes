@@ -1,0 +1,638 @@
+Create 3 servers, 1-ansible, 2-nodes
+give the node-ips in inventory.(private-ips)
+
+02-hello-world.yml:
+=== ========== ====
+Inventory.ini
+
+[local]
+localhost
+
+-name: hello-world
+ hosts: local # create local on Inventory.
+ connection: local
+ tasks:
+   -name: print hello-world
+    ansible.builtin.debug:
+	    msg: "hello-world"
+		
+ansible-playbook -i inventory.ini 02-hello-world.yml
+
+what are ansible adhoc commands?
+it is ansible command line to perform one time tasks or
+quick tasks when we don't have to write a playbook.
+
+why use adhoc commands?
+
+it useful for 
+* checking connectivity, 
+* running one-time tasks,
+* quick troubleshooting
+* gathering information.
+
+basic sysntax: ansible <host-pattern> -m <module> -a "<arguments>"
+
+examples: 
+
+ping all servers
+
+ ansible all -i inventory.ini -m ping   --> Checks if all nodes are reachable
+
+check uptime of servers:
+
+ansible all -i inventory.ini -m command -a "uptime" 
+
+Install a Package on RHEL:
+
+ansible all -i inventory.ini -m yum -a "name=httpd state=present" --become
+
+start a service:
+
+ansible all -i inventory.ini -m service -a "name=httpd state=started" --become
+
+Remove the package:
+
+Install a Package on RHEL:
+
+ansible all -i inventory.ini -m yum -a "name=httpd state=absent" --become
+
+create a user:
+ansible all -i inventory.ini -m user -a "name=testuser state=present" --become
+
+check user is created or not:
+ansible all -i inventory.ini -m command -a "grep testuser /etc/passwd"
+
+Run shell command:
+ansible all -i inventory.ini -m shell -a "df -h"
+
+gather system information:
+ansible all -i inventory.ini -m setup
+
+Restart a service:
+ansible webservers -m service -a "name=httpd state=restarted" --become
+
+how to copy files:
+
+echo "Hello from Ansible" > file.txt
+
+ansible all -i inventory.ini -m copy -a "src=file.txt dest=/tmp/file.txt"
+
+Verify on remote nodes:
+
+ansible all -i inventory.ini  -m shell -a "cat /tmp/file.txt"
+
+
+
+
+03.nginx.yaml:  install nginx and start the nginx
+=== ===========
+
+- name: nginx install and run
+  hosts: frontend
+  become: yes # sudo access
+  tasks:
+  - name: install nginx server
+    ansible.builtin.package:
+      name: nginx
+      state: present
+  
+  - name: start nginx
+    ansible.builtin.service:
+      name: nginx
+      state: started
+      enabled: yes
+	  
+ansible-playbook -i inventory.ini -e ansible_user=ec2-user -e ansible_password=DevOps321 03.nginx.yaml
+
+
+
+================================================================================================
+
+
+
+
+04-multi-play.yml: 2 playbooks write in one playbook.
+====== ==========
+- name: PLAY1
+  hosts: local
+  connection: local
+  tasks:
+  - name: hello from play 1 and task1
+    ansible.builtin.debug:
+      msg: "Hello from PLAY-1 and TASK-1"
+  
+  - name: hello from play 1 and task2
+    ansible.builtin.debug:
+      msg: "Hello from PLAY-1 and TASK-2"
+
+- name: PLAY2
+  hosts: local
+  connection: local
+  tasks:
+  - name: hello from play 2 and task1
+    ansible.builtin.debug:
+      msg: "Hello from PLAY-2 and TASK-1"
+  
+  - name: hello from play 2 and task2
+    ansible.builtin.debug:
+      msg: "Hello from PLAY-2 and TASK-2"
+
+ansible-playbook -i inventory.ini 04-multi-play.yml
+
+===============================================================================================================================
+
+
+
+
+Now we can discuss with 
+variables, data types, conditions, loops, error handling, functions.
+
+variables hold a specific value, you can use it wherever you want.
+if you change at one place it will reflected all the places,
+where you are reffering.
+
+
+05-play-vars.yml:
+==================
+
+- name: play level variables
+  hosts: local
+  connection: local
+  vars:
+    COURSE: Ansible # equal to COURSE=Ansible in shell, shell we refer $VAR or ${VAR}
+    DURATION: 10HR
+    TRAINER: Satyam
+  tasks:
+  - name: print course information
+    ansible.builtin.debug:
+    #vars refernce should be surrounded by ""
+      msg: "Hello {{ COURSE }}, Course Duration: {{ DURATION }}, Trainer is {{ TRAINER }}"
+	  
+
+ansible-playbook -i inventory.ini 05-play-vars.yml
+
+
+ - name: print course information agian
+    ansible.builtin.debug:
+    #vars refernce should be surrounded by ""
+      msg: "Hello {{ COURSE }}, Course Duration: {{ DURATION }}, Trainer is {{ TRAINER }}"
+	  
+ansible-playbook -i inventory.ini 05-play-vars.yml
+
+you can run it again its working fine, because you are mentioning 
+the variables in global level.
+
+
+==============================================================================================================================
+
+
+next we goto task-level variables:
+
+06-task-vars.yaml:
+=========== ======     # we can change the local varibles	COURSE: Ansible,so in o/p its 
+                         takes local-variables : ansible only.
+
+
+- name: play level variables
+  hosts: local
+  connection: local
+  vars:
+    COURSE: DevOps with AWS
+    DURATION: 10HR
+    TRAINER: Satyam
+  tasks:
+  - name: print course information
+    vars:
+      COURSE: Ansible
+    ansible.builtin.debug:
+      msg: "Hello {{ COURSE }}, Course Duration: {{ DURATION }}, Trainer is {{ TRAINER }}"
+	  
+
+
+ansible-playbook -i inventory.ini 06-task-vars.yaml
+
+
+
+# we can take another task and remove vars: COURSE: Ansible.
+
+tasks:
+  - name: print course information again
+    ansible.builtin.debug:
+      msg: "Hello {{ COURSE }}, Course Duration: {{ DURATION }}, Trainer is {{ TRAINER }}"
+	  
+Now we can exicute the playbook.
+
+ansible-playbook -i inventory.ini 06-task-vars.yaml
+
+see the vars takes the global-variable:  o/p COURSE: devops with AWS.
+
+This concepts is called Inheritance:
+"In Ansible, task-level (local) variables override play-level (global) variables, but only within that specific task."
+
+
+======================================================================================================================================
+
+
+
+07-vars-files.yaml: its can create all the variables in one file: course.yml
+===================
+
+#course.yml
+
+COURSE: DevSecOps with AWS
+DURATION: 120HR
+TRAINER: satyam
+
+- name: variables from files
+  hosts: local
+  connection: local
+  vars_files:
+  - course.yaml  # create course.yml file
+  tasks:
+  - name: print course information
+    ansible.builtin.debug:
+      msg: "Hello I am learning {{ COURSE }}, Duration: {{ DURATION }}, Trainer is: {{ TRAINER }}"
+	  
+ansible-playbook -i inventory.ini 07-vars-files.yaml  
+	  
+
+====================================================================================================================================
+
+
+
+
+08-vars-prompt.yaml:  we can enter in to the details in prompt like username & password.
+============= ====
+
+- name: variables from prompt
+  hosts: local
+  connection: local
+  vars_prompt:
+  - name: USERNAME
+    prompt: Please enter your username
+    private: true # its shows the prompt details.
+  
+  - name: PASSWORD
+    prompt: please enter your password
+    private: true
+  tasks:
+  - name: printing user information
+    ansible.builtin.debug:
+      msg: "Hello Username is: {{ USERNAME }}, password is: {{ PASSWORD }}"
+	  
+ansible-playbook -i inventory.ini 08-vars-prompt.yaml
+
+please enter your username: satyam
+please enter your password: satyam123
+
+you dont want to see the output in username& passowrd:
+change the script:
+
+ - name: printing user information
+    ansible.builtin.debug:
+      msg: "Hello Username is: {{ USERNAME }}, password is: {{ PASSWORD }}"
+	no_log: true
+	
+
+
+================================================================================================================
+
+09-vars-inventory.yaml:  we can define the variables in Inventory also: varibles can take directly into inventory.
+=== ================ ==
+
+Inventory.ini:
+
+[local:vars]
+COURSE=Ansible
+TRAINER=Satyam
+DURATION=1.5HR
+
+---
+- name: variables from inventory
+  hosts: local
+  connection: local
+  tasks:
+  - name: print course info
+    ansible.builtin.debug:
+      msg: "Hello I am learning {{ COURSE }}, Duration: {{ DURATION }}, Trainer is: {{ TRAINER }}"
+	  
+
+ansible-playbook -i inventory.ini 09-vars-inventory.yaml
+
+================================================================================================================
+
+
+
+10-vars-inventory.yaml: we can change the inventory in 2 servers with different variables and put the username&password in inventory.
+=== ======= ==========
+inventory.ini:
+[frontend]
+172.31.41.22 COURSE=Ansible DURATION=10HR TRAINER=Sivakumar ansible_user=ec2-user ansible_password=DevOps321
+172.31.42.49 COURSE=variables DURATION=1.5HR TRAINER=Sivakumar ansible_user=ec2-user ansible_password=DevOps321
+	  
+
+---
+- name: variables from inventory
+  hosts: frontend
+  tasks:
+  - name: print course info
+    ansible.builtin.debug:
+      msg: "Hello I am learning {{ COURSE }}, Duration: {{ DURATION }}, Trainer is: {{ TRAINER }}"
+	  
+
+ansible-playbook -i inventory.ini 10-vars-inventory.yaml
+
+
+====================================================================================================================
+
+11-vars-args.yaml: we can pass the variables in run time thorugh arguments.
+===== ====== ====
+we can toggle line comment the inventory.ini in :
+
+Inventory.ini:
+
+; [local:vars]
+; COURSE=Ansible
+; TRAINER=Satyam
+; DURATION=1.5HR
+
+
+- name: variables from inventory
+  hosts: local
+  connection: local
+  tasks:
+  - name: print course info
+    ansible.builtin.debug:
+      msg: "Hello I am learning {{ COURSE }}, Duration: {{ DURATION }}, Trainer is: {{ TRAINER }}"
+	  
+	  
+ansible-playbook -i inventory.ini 11-vars-args.yaml -e "COURSE=args" -e "DURATION=1.5hr" -e "TRAINER=satyam"
+
+
+=======================================================================================================================================
+
+
+what is the preference of this all variables. how can we run the variables in order which one is first.
+
+1.define same variable in all possible locations.
+2.run the playbook.
+3.comment when you understand the preference.
+
+12.vars-preference.yaml:
+============ ==== ====
+
+course.yml --> 
+
+GREETING: "Hello From File"
+
+inventory.ini
+GREETING="Hello from Inventory"
+
+---
+- name: understand vars preference
+  hosts: local
+  connection: local
+  vars:
+     GREETING: "Hello from PLAY"
+  vars_files:
+   - course.yaml
+  vars_prompt:
+   - name: GREETING
+     prompt: Please enter the greeting
+     private: false
+  tasks:
+  - name: print the greeting
+     vars:
+       GREETING: "Hello from TASK"
+    ansible.builtin.debug:
+      msg: "{{ GREETING }}"
+	  
+
+first we can run through args:
+
+ansible-playbook -i inventory.ini 12.vars-preference.yaml -e "GREETING=Hello-from-args"
+
+
+first preperence is command line arguments.
+
+next we run the playbook: ansible-playbook -i inventory.ini 12.vars-preference.yaml
+
+please enter the greeting: hello from prompt --> its asking prompt but the next preference is task.
+
+so second preference is task level.
+
+comment the task play lines:
+ #vars:
+       #GREETING: "Hello from TASK"
+	   
+after run the playbook: ansible-playbook -i inventory.ini 12.vars-preference.yaml
+
+Enter the greeting: hello from prompt
+but it take file.
+
+third preference is filelevel variables.
+so we can comment the file level:
+
+#vars_files:
+ #  - course.yaml
+ 
+next we run the playbook: ansible-playbook -i inventory.ini 12.vars-preference.yaml
+
+enter the prompt: hello from prompt
+
+fourth preference is prompt.
+so we can comment the prompt lines:
+
+  #vars_prompt:
+  # - name: GREETING
+    # prompt: Please enter the greeting
+    #private: false
+	
+we run the playbook:  ansible-playbook -i inventory.ini 12.vars-preference.yaml
+
+last it runinto the play-level.
+
+after final inventory.ini
+
+Play level varibales you can over ride with task level varaibles.
+
+preference:
+# 1. command line or args
+# 2. Task
+# 3. File
+# 4. prompt
+# 5. Play
+# 6. inventory
+
+
+================================================= ====================================== ============================================
+
+13.Data-types.yml:
+=== ============= “In this playbook, we learned: How Ansible executes tasks step by step
+
+Different data types:
+String
+Integer
+Boolean
+List
+Dictionary
+And finally how to read execution results using PLAY RECAP.
+
+---
+- name: ansible datatypes
+  hosts: local
+  connection: local
+  vars:
+    DURATION: 120 # This is number
+    COURSE: "DevSecOps with AWS" # String
+    IS_LIVE: true # boolean
+    TOOLS: # List []
+    - Linux
+    - shell
+    - Ansible
+    CONCETPS: # map or dictionary or object. referred like {}
+      CI: Jenkins
+      SCRIPTING: "Shell, Ansible, Terraform, Python"
+  tasks:
+  - name: print course information
+    ansible.builtin.debug:
+      msg: "Course is: {{ COURSE }}, Duration: {{ DURATION }}, is live?: {{ IS_LIVE }}, Tools are: {{ TOOLS }}, Concepts are: {{ CONCETPS }}"
+	  
+	
+	
+ansible-playbook -i inventory.ini 13.data-types.yml
+
+================================================ ==================== =============================================== ============
+
+
+
+14-conditions.yaml:
+===== ==============
+
+- name: conditions demo
+  hosts: local
+  connection: local
+  vars:
+    NUMBER: 78
+  tasks:
+  - name: print if the number is less than or equal to 100
+    ansible.builtin.debug:
+      msg: "Given number {{ NUMBER }} is less than or equal to 100"
+    when: NUMBER <= 100
+
+  - name: print if the number is greater than 100
+    ansible.builtin.debug:
+      msg: "Given number {{ NUMBER }} is greater than 100"
+    when: NUMBER > 100
+	
+	
+======================= ======================== ============================== =============================================
+
+
+15.gather-facts.yaml:
+=== ========= =======
+- name: gathering facts
+  hosts: local
+  connection: local
+  tasks:
+  - name: print facts
+    ansible.builtin.debug:
+      msg: "{{ ansible_facts }}"
+	  
+
+setup module → collects facts
+ansible_facts → stores those collected facts
+
+👉 So they are NOT the same, but they are directly connected.
+	setup module  ➜  collects data  ➜  stores in  ➜  ansible_facts.  
+====================================== ========================= =========================== ====================================
+
+
+16-conditions.yaml:
+==== ===== ========
+- name: playbook control using ansible facts
+  hosts: frontend
+  become: yes
+  tasks:
+  - name: install nginx if redhat
+    ansible.builtin.dnf:
+      name: nginx
+      state: present
+    when: ansible_os_family == "RedHat"
+
+  - name: install nginx if debian
+    ansible.builtin.apt:
+      name: nginx
+      state: present
+    when: ansible_os_family == "Debian"
+	
+	
+===== ====================== ============================= ============================= ============================== ==================
+
+17-loops.yaml:
+====== ========
+
+- name: loops
+  hosts: local
+  connection: local
+  tasks:
+  - name: print names
+    ansible.builtin.debug:
+      msg: "Hello, {{ item }}" #item here is reserved keyword
+    loop:
+    - Suresh
+    - Ramesh
+    - Joseph
+    - Raheem
+	
+	
+	
+=============== ================================== ==================
+
+18-loops.yaml
+=== =========
+
+- name: install packages
+  hosts: frontend
+  become: yes
+  tasks:
+  - name: install packages
+    ansible.builtin.package:
+      name: "{{ item }}"
+      state: installed
+    loop:
+    - mysql
+    - nginx
+    - zip
+	
+	
+=========== ======================================== =======================
+
+
+19-loops.yml:
+== ==========
+
+- name: install packages
+  hosts: frontend
+  become: yes
+  tasks:
+  - name: install packages
+    ansible.builtin.package:
+      name: "{{ item.name }}"
+      state: "{{ item.state }}"
+    loop:
+    - { name: 'nginx', state: 'present'}
+    - { name: 'mysql', state: 'absent'}
+    - { name: 'zip', state: 'absent'}
+	
+	
+
+
+
+
+
+
+
+
+
+

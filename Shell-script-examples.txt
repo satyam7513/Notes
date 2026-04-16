@@ -1,0 +1,202 @@
+1.Service Monitoring & Restart Script: 
+
+If nginx/apache goes down → restart automatically.
+
+#!/bin/bash
+SERVICE="nginx"
+systemctl is-active --quiet $SERVICE
+if [ $? -ne 0 ]; then
+    echo "$SERVICE is down. Restarting..."
+    systemctl restart $SERVICE
+else
+    echo "$SERVICE is running fine."
+fi	
+
+2. User Creation Automation: create multiple users automatically.
+
+#!/bin/bash
+for USER in user1 user2 user3
+do
+    useradd $USER
+    echo "$USER created"
+done
+
+3. Website Health Check Script:  Check if website is up.
+
+#!/bin/bash
+URL="https://google.com"
+STATUS=$(curl -o /dev/null -s -w "%{http_code}" $URL)
+if [ $STATUS -eq 200 ]; then
+    echo "Website is UP"
+else
+    echo "Website is DOWN (Status: $STATUS)"
+fi
+
+
+4. Auto Kill High Memory Process : A process is consuming too much memory and impacting server performance.
+
+#!/bin/bash
+THRESHOLD=80
+ps -eo pid,ppid,cmd,%mem --sort=-%mem | awk 'NR>1 {print $1, $4}' | while read pid mem
+do
+    mem_int=${mem%.*}
+    
+    if [ $mem_int -gt $THRESHOLD ]; then
+        echo "Killing process $pid using $mem% memory"
+        kill -9 $pid
+    fi
+done
+
+5.Auto Log Rotation Script (Instead of logrotate):
+Logs grow huge → rotate manually using script.
+
+#!/bin/bash
+
+LOG_FILE="/var/log/app.log"
+MAX_SIZE=1000000  # 1MB
+
+SIZE=$(stat -c%s "$LOG_FILE")
+
+if [ $SIZE -gt $MAX_SIZE ]; then
+    mv $LOG_FILE $LOG_FILE.$(date +%Y%m%d%H%M%S)
+    touch $LOG_FILE
+    echo "Log rotated"
+fi
+
+6.Server Health Report Script: Send system health report daily.
+
+#!/bin/bash
+
+echo "===== SERVER HEALTH REPORT ====="
+echo "Hostname: $(hostname)"
+echo "Uptime: $(uptime -p)"
+
+echo "---- CPU ----"
+top -bn1 | grep "Cpu(s)"
+
+echo "---- MEMORY ----"
+free -h
+
+echo "---- DISK ----"
+df -h
+
+echo "---- TOP PROCESSES ----"
+ps -eo pid,cmd,%cpu,%mem --sort=-%cpu | head -5
+
+7.Database Backup Script: Backup MySQL database.
+
+#!/bin/bash
+
+DB_NAME="mydb"
+USER="root"
+PASSWORD="password"
+BACKUP_DIR="/backup"
+
+DATE=$(date +%F)
+
+mysqldump -u $USER -p$PASSWORD $DB_NAME > $BACKUP_DIR/db_$DATE.sql
+
+echo "Database backup completed"
+
+8.Alert If Service Port is Not Listening: Check if app port is down
+
+#!/bin/bash
+
+PORT=8080
+
+netstat -tuln | grep ":$PORT" > /dev/null
+
+if [ $? -ne 0 ]; then
+    echo "Port $PORT is NOT listening!"
+else
+    echo "Port $PORT is active"
+fi
+
+
+9.SSL Certificate Expiry Check:  Avoid production outage due to expired SSL.
+
+#!/bin/bash
+
+DOMAIN="google.com"
+
+EXPIRY=$(echo | openssl s_client -connect $DOMAIN:443 2>/dev/null | \
+openssl x509 -noout -enddate | cut -d= -f2)
+
+echo "SSL Expiry Date: $EXPIRY"
+
+10.Write a script to check if a file exists
+
+if [ -f file.txt ]; then
+    echo "File exists"
+fi
+
+11.Reverse a string:
+#!/bin/bash
+str="hello"
+echo "$str" | rev
+
+12.Find largest number:
+#!/bin/bash
+a=10
+b=20
+
+if [ $a -gt $b ]; then
+    echo "$a is greater"
+else
+    echo "$b is greater"
+fi
+
+13.Print even numbers from 1 to 50 using for loop:
+for i in {1..50}
+do
+    if (( i % 2 == 0 ))
+    then
+        echo $i
+    fi
+done
+
+14.Scenario 1:
+
+👉 Server disk is full automatically. What will you do?
+Check disk usage (df -h)
+Find large files (du -sh)
+Delete old logs
+Write cleanup script
+
+15.Scenario 2:
+
+👉 Application is down at midnight.
+
+Check service status
+Check logs
+Restart service
+Automate using script + cron
+
+16.Scenario 3:
+
+👉 You have 100 servers—how will you run commands?
+
+SSH loop
+Ansible (better solution)
+
+17.Scenario 4:
+
+👉 Logs are increasing rapidly.
+
+Implement log rotation
+Compress old logs
+Automate cleanup
+
+18.Scenario 5:
+
+👉 High CPU usage alert.
+
+Identify process (top, ps)
+Kill or optimize
+Automate monitoring
+
+19.Difference between $* and $@?
+$* → all args as single string
+$@ → args as separate
+
+
