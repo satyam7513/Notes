@@ -468,7 +468,8 @@ preference:
 ================================================= ====================================== ============================================
 
 13.Data-types.yml:
-=== ============= “In this playbook, we learned: How Ansible executes tasks step by step
+=== =============
+“In this playbook, we learned: How Ansible executes tasks step by step
 
 Different data types:
 String
@@ -483,6 +484,7 @@ And finally how to read execution results using PLAY RECAP.
   hosts: local
   connection: local
   vars:
+  
     DURATION: 120 # This is number
     COURSE: "DevSecOps with AWS" # String
     IS_LIVE: true # boolean
@@ -529,7 +531,7 @@ ansible-playbook -i inventory.ini 13.data-types.yml
 ======================= ======================== ============================== =============================================
 
 
-15.gather-facts.yaml:
+15.gather-facts.yaml:   facts means variables.
 === ========= =======
 - name: gathering facts
   hosts: local
@@ -569,62 +571,7 @@ ansible_facts → stores those collected facts
 	
 ===== ====================== ============================= ============================= ============================== ==================
 
-17-loops.yaml:
-====== ========
 
-- name: loops
-  hosts: local
-  connection: local
-  tasks:
-  - name: print names
-    ansible.builtin.debug:
-      msg: "Hello, {{ item }}" #item here is reserved keyword
-    loop:
-    - Suresh
-    - Ramesh
-    - Joseph
-    - Raheem
-	
-	
-	
-=============== ================================== ==================
-
-18-loops.yaml
-=== =========
-
-- name: install packages
-  hosts: frontend
-  become: yes
-  tasks:
-  - name: install packages
-    ansible.builtin.package:
-      name: "{{ item }}"
-      state: installed
-    loop:
-    - mysql
-    - nginx
-    - zip
-	
-	
-=========== ======================================== =======================
-
-
-19-loops.yml:
-== ==========
-
-- name: install packages
-  hosts: frontend
-  become: yes
-  tasks:
-  - name: install packages
-    ansible.builtin.package:
-      name: "{{ item.name }}"
-      state: "{{ item.state }}"
-    loop:
-    - { name: 'nginx', state: 'present'}
-    - { name: 'mysql', state: 'absent'}
-    - { name: 'zip', state: 'absent'}
-	
 	
 
 

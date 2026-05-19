@@ -1,0 +1,148 @@
+Site Reliability Engineer (SRE) Course Content
+
+Module 1: Introduction to Site Reliability Engineering
+What is Site Reliability Engineering (SRE)
+Evolution of SRE (Google SRE Model)
+SRE vs DevOps vs System Administration
+Role & Responsibilities of an SRE
+Production environment architecture
+Reliability engineering concepts
+Hands-on
+Setup sample production environment
+
+Module 2: Linux for SRE
+Linux fundamentals
+File system management
+Process management
+Networking commands
+Package management
+User management
+Shell scripting basics
+Hands-on
+Write automation scripts for system tasks
+
+Module 3: Networking & System Architecture
+OSI & TCP/IP models
+DNS, HTTP/HTTPS
+Load balancing concepts
+Reverse proxy
+Network troubleshooting
+High availability architectures
+Hands-on
+Configure Nginx reverse proxy
+Setup load balancing
+
+Module 4: Cloud Computing for SRE
+Introduction to Cloud
+AWS / Azure / GCP fundamentals
+Compute services
+Storage services
+Networking in cloud
+Security best practices
+Hands-on
+Launch EC2 instances
+Configure VPC and security groups
+
+Module 5: Infrastructure as Code (IaC)
+Infrastructure automation concepts
+Terraform fundamentals
+Writing Terraform scripts
+Managing infrastructure lifecycle
+Hands-on
+Deploy infrastructure using Terraform
+
+Module 6: Containerization & Orchestration
+Introduction to Docker
+Docker architecture
+Building Docker images
+Docker networking
+Kubernetes architecture
+Pods, Deployments, Services
+Hands-on
+Deploy containerized applications
+Kubernetes cluster setup
+
+Module 7: CI/CD Automation
+Continuous Integration
+Continuous Delivery
+Jenkins architecture
+Pipeline creation
+Git workflows
+Deployment strategies
+Hands-on
+Build CI/CD pipeline using Jenkins + Git
+
+Module 8: Monitoring & Observability
+Monitoring is a core responsibility of SRE teams to ensure system reliability.
+Topics:
+Monitoring fundamentals
+Metrics vs logs vs traces
+Prometheus monitoring
+Grafana dashboards
+ELK Stack (Elasticsearch, Logstash, Kibana)
+Alerting systems
+Hands-on
+Setup Prometheus monitoring
+Create Grafana dashboards
+
+Module 9: Reliability Engineering Concepts
+SLAs, SLOs, SLIs
+Error budgets
+Reliability targets
+Availability calculations
+Performance optimization
+Hands-on
+Define SLOs for production application
+
+Module 10: Incident Management
+Incident lifecycle
+Root cause analysis
+Incident response process
+Runbooks
+Postmortem analysis
+Hands-on
+Simulated production outage troubleshooting
+
+Module 11: Capacity Planning & Performance
+Capacity planning techniques
+Load testing concepts
+JMeter performance testing
+Scaling strategies
+Fault tolerance
+Hands-on
+Perform load testing
+Module 12: Security & DevSecOps
+Security basics
+Vulnerability scanning
+Container security
+Secrets management
+
+-->Real-Time Projects
+Project 1
+Deploy Highly Available Web Application Infrastructure
+Project 2
+Build CI/CD pipeline for microservices application
+Project 3
+Implement Full Monitoring Stack
+Prometheus
+Grafana
+ELK
+Project 4
+Production Incident Management Simulation
+
+-->Tools Covered
+Linux
+Git & GitHub
+Docker
+Kubernetes
+Terraform
+Jenkins
+Prometheus
+Grafana
+ELK Stack
+AWS / Azure
+
+--> 4 Industry Projects
+Monitoring & Observability Tools
+CI/CD Automation
+Kubernetes & Cloud Deployment

@@ -1,0 +1,253 @@
+SRE DEMO:
+==== =========
+“Hi everyone, today we are going to understand Site Reliability Engineering (SRE) — 
+which is one of the most in-demand roles in production environments.
+
+SRE is not just DevOps… it is about:
+👉 How to keep systems reliable, scalable, and available in real-world production.”
+
+2. What is SRE:
+== ===== =====
+“SRE was introduced by Google.
+
+Definition:
+👉 SRE is applying software engineering practices to IT operations.
+
+That means:
+
+Automating operations.
+Reducing manual work.
+Improving system reliability”
+
+🔥 Simple Example:
+“Imagine:
+
+Website is down → users complain
+DevOps fixes it manually
+
+But SRE asks:
+👉 Why did it fail?
+👉 How to prevent it permanently?”
+
+
+3. SRE vs DevOps:
+== ==== =========
+“Many people confuse SRE with DevOps.
+
+Difference:
+
+DevOps → focuses on delivery speed
+SRE → focuses on reliability
+
+👉 Simple line to remember:
+‘DevOps builds fast, SRE keeps it stable.’”
+
+
+4. Production Environment:
+=== =========== ========
+
+“In real companies, applications run in production like this:”
+
+User → Load Balancer → Application → Database
+
+👉 Explain:
+
+Users access app
+Load balancer distributes traffic
+App processes requests
+DB stores data.
+
+
+🟢 5. Core Concept: Reliability ((VERY IMPORTANT – 10 min))
+==== =================== ===================== ==========
+“SRE is all about reliability.
+
+We measure reliability using 3 important terms:”
+
+
+📊 SLI (Service Level Indicator):
+
+👉 “What we measure”
+
+Example:
+
+Request success rate
+Response time
+
+
+🎯 SLO (Service Level Objective)
+
+👉 “Target value”
+
+Example:
+
+99.9% uptime
+
+📜 SLA (Service Level Agreement)
+
+👉 “Business promise”
+
+Example:
+
+If uptime < 99%, company pays penalty
+
+
+🔥 Simple Analogy
+
+“Think like this:
+
+SLI = marks you got
+SLO = target marks
+SLA = promise to parents 😄”
+
+
+🟢 6. Monitoring & Observability (10 min):
+=== ============== =====================
+“To maintain reliability, we must monitor systems.”
+
+Key Metrics (Golden Signals)
+
+👉 Explain:
+
+Latency → response time
+Traffic → number of users
+Errors → failures
+Saturation → resource usage
+
+Tools:
+Prometheus → collects metrics
+Grafana → dashboards
+
+“These tools help us know what is happening in real time.”
+
+
+🟢 7. Alerting:
+===================
+
+“Monitoring alone is not enough.
+
+We need alerts when something goes wrong.”
+
+Example:
+
+“If CPU > 80%, send alert”
+
+Tool: Alert Manager.
+
+👉 Explain:
+
+Alerts notify engineers
+Helps quick action.
+
+
+🟢 8. Incident Management:
+===== =========== ========
+
+“When something breaks in production, it is called an incident.”
+
+Steps:
+Detect issue
+Respond
+Fix
+Analyze
+
+“SRE follows blameless culture
+We fix systems, not blame people.”
+
+🟢 9. Automation: 
+========= =======
+“SRE removes manual work using automation.”
+
+Concept: Toil
+
+👉 “Repetitive manual work = Toil”
+
+Example:
+
+Restarting server daily: 
+Tool:
+Ansible
+
+“We automate tasks so engineers focus on improvement.”
+
+🟢 10. Scalability & High Availability:
+===== ============= ============= =====
+“To handle more users, systems must scale.”
+Concepts:
+Horizontal scaling → add servers
+Load balancing → distribute traffic
+
+Tool:
+NGINX
+
+👉 Example:
+
+“If one server fails, another handles traffic.”
+
+
+🟢 11. Real-Time Scenario (MOST IMPORTANT – 15 min):
+
+“Let’s see how SRE works in real life.”
+
+Scenario:
+Application deployed
+Users start accessing
+Suddenly:
+CPU increases
+App becomes slow.
+
+What SRE does:
+
+👉 Step 1: Monitoring detects issue
+👉 Step 2: Alert triggered
+👉 Step 3: Engineer investigates
+👉 Step 4: Fix issue (restart/scale)
+👉 Step 5: Add automation to prevent
+
+👉 Say this line strongly:
+
+“SRE is not just fixing issues…
+It is preventing future failures.”
+
+🟢 12. Closing:
+===== =========
+“To summarize:
+
+SRE is about:
+
+Reliability
+Monitoring
+Automation
+Handling failures
+
+If DevOps is about delivering software,
+👉 SRE is about keeping it running perfectly.”
+
+
+🎯 Final Demo Flow (Quick Revision)
+Intro
+What is SRE
+SRE vs DevOps
+Production architecture
+SLI/SLO/SLA
+Monitoring
+Alerting
+Incident management
+Automation
+Scaling
+Real scenario
+Summary
+
+
+-->Tools Covered
+Linux- 100%
+Git & GitHub
+Ansible
+Terraform
+Docker
+Kubernetes
+Jenkins
+Prometheus
+Grafana
+ELK Stack
+AWS 

@@ -1,0 +1,767 @@
+Ansible Roles:
+=== =========
+DRY --> Don't repeat yourself.
+
+Variables
+functions
+
+IN Roboshop project we repeat these tasks:
+
+create system user
+install programming language
+download code
+create directory
+unzip code
+install dependencies
+create systemctl service
+start the service
+
+Role is a proper directory structure to write ansible playbooks. we can reuse roles. 
+it will have tasks, vars, templates,files, handlers, etc...
+
+Instead of writing one long playbook, you break it into smaller, reusable parts called roles. 
+Each role handles one responsibility (like installing a web server, configuring a database, etc.).
+
+
+What is inside a Role?
+
+A role has a standard directory structure. The most common folders are:
+
+my_role/
+├── tasks/        # What to do (main logic)
+├── handlers/     # Actions triggered by tasks (e.g., restart service)
+├── templates/    # Dynamic config files (Jinja2 templates)
+├── files/        # Static files
+├── vars/         # Variables (high priority)
+├── defaults/     # Default variables (low priority)
+├── meta/         # Role metadata (dependencies)
+
+
+
+create ansible-roboshop-roles repository
+
+create instances like mongodb catalogue frontend
+
+ansible-roboshop-roles under create
+
+copy the inventory files: add this vars
+
+
+[mongodb]
+mongodb.kimidi.site
+[catalogue]
+catalogue.kimidi.site
+[redis]
+redis.kimidi.site
+[user]
+user.kimidi.site
+[cart]
+cart.kimidi.site
+[frontend]
+frontend.kimidi.site
+[mysql]
+mysql.kimidi.site
+[shipping]
+shipping.kimidi.site
+[rabbitmq]
+rabbitmq.kimidi.site
+[payment]
+payment.kimidi.site
+
+[all:vars]
+ansible_user=ec2-user
+ansible_password=DevOps321
+
+
+create one directory roles/mongodb
+
+
+after create  
+mongodb.yml
+
+#####/roles/mongodb/mongodb.yml
+
+---
+- name: configure mongodb component
+  hosts: mongodb
+  become: yes
+  roles: #this will automatically load a folder called roles in current working directory.
+  - mongodb
+  
+  
+after create :roles/mongodb-- under
+/tasks/main.yml
+
+/roles/mongodb/tasks/main.yml
+
+main.yml --> copy the previous mongodb.yml code.
+
+you can run the playbook:
+
+#####ansible-playbook -i inventory.ini mongodb.yml
+
+getting Error message: could not find mongorepo, its searching in all locations.
+
+if you want files in roles you create "file" folder.
+
+/roles/mongodb/ create one folder called files.
+after create mongo.repo
+
+###/roles/mongodb/files/mongo.repo
+
+copy and paste here mongo.repo content.
+
+after once exicute the playbook.
+
+####ansible-playbook -i inventory.ini mongodb.yml
+
+Roles--> we can create main.yml and parametrize.
+
+main.yml
+
+- name: configure {{ component }}
+  become: yes
+  hosts: "{{ component }}"
+  roles:
+  - "{{ component }}"
+  
+# ansible-playbook -i inventory.ini -e "component=mongodb" main.yml
+ 
+ 
+ 
+CATALOGUE:
+===== ======= 
+ 
+ 
+create catalogue role
+=>  roles/
+        /catalogue/tasks/main.yml   (copy the Entire code from catalogue.yml- modify the code below)
+
+
+
+- name: app setup
+  include_role:
+    name: common
+    tasks_from: app-setup
+	
+- name: nodejs setup
+  include_role:
+    name: common
+    tasks_from: nodejs
+	
+- name: copy mongodb repo
+  ansible.builtin.copy:
+    src: mongo.repo
+    dest: /etc/yum.repos.d/mongo.repo
+	
+- name: install mongodb client
+  ansible.builtin.dnf:
+    name: mongodb-mongosh
+    state: present
+	
+- name: check products loaded or not
+  ansible.builtin.command: mongosh --host mongodb.daws84s.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")'
+  register: catalogue_output
+	
+- name: print catalogue output
+  ansible.builtin.debug:
+    msg: "{{ catalogue_output }}"
+	
+
+- name: load products
+  ansible.builtin.shell: mongosh --host mongodb.daws84s.site < /app/db/master-data.js
+  when: catalogue_output.stdout | int < 0
+  
+- name: systemd setup
+  include_role:
+    name: common
+    tasks_from: systemd.yaml
+
+
+#In shell script common code write in common.sh same like that common/tasks
+
+
+####/roles/common/tasks/app-setup.yml
+
+
+- name: create app directory
+  ansible.builtin.file:
+    path: /app
+    state: directory
+	
+- name: create roboshop system user
+  ansible.builtin.user:
+    name: roboshop
+    shell: /sbin/nologin
+    system: true
+    home: /app
+	
+- name: "download {{ component }} code"
+  ansible.builtin.get_url:
+    url: "https://roboshop-artifacts.s3.amazonaws.com/{{ component }}-v3.zip"
+    dest: /tmp/{{ component }}.zip
+
+
+- name: "extract {{ component }} code"
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ component }}.zip"
+    dest: /app
+    remote_src: yes
+	
+	
+####/roles/common/tasks/nodejs.yml	
+
+- name: disable default nodejs
+  ansible.builtin.command: dnf module disable nodejs -y
+
+- name: enable nodejs:20
+  ansible.builtin.command: dnf module enable nodejs:20 -y
+
+- name: Install nodejs
+  ansible.builtin.dnf:
+    name: nodejs
+    state: present
+
+- name: install dependencies
+  community.general.npm:
+    path: /app
+	
+	
+
+###/roles/common/tasks/systemd.yml
+
+- name: copy {{ component }} service to system directory
+  ansible.builtin.template:
+    src: "{{ component }}.service.j2"
+    dest: "/etc/systemd/system/{{ component }}.service"
+
+- name: systemctl deamon reload
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: start and enable {{ component }}
+  ansible.builtin.service:
+    name: "{{ component }}"
+    state: restarted # even app is not running we can restart
+    enabled: yes
+	
+
+
+
+/catalogue - create files directory and create mongo.repo
+paste the code.
+
+###/catalogue/files/mongo.repo:
+
+[mongodb-org-7.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/9/mongodb-org/7.0/x86_64/
+enabled=1
+gpgcheck=0
+
+
+####create catalogue/vars/main.yml
+
+MONGODB_HOST: mongodb.kimidi.site
+
+
+
+ansible templates
+================= === ==================================
+
+file --> content inside a specific file
+
+template --> we can keep some placeholders, you can put the values at run time
+
+follows jinja2 formatting, we can keep some placeholders, 
+actual values will be provided through variables at runtime.
+
+Ansible templates are dynamic files that use Jinja2 variables 
+to generate customized configuration files automatically.
+
+Role execution flow
+
+When playbook runs:
+
+Reads playbook
+Finds role
+Executes tasks
+Loads variables
+Applies templates
+Runs handlers
+
+
+create templates in catalogue/catalogue.service.j2
+
+###catalogue/templates/catalogue.service.j2
+
+[Unit]
+Description = Catalogue Service
+
+[Service]
+User=roboshop
+Environment=MONGO=true
+// highlight-start
+Environment=MONGO_URL="mongodb://{{ MONGODB_HOST }}:27017/catalogue"
+// highlight-end
+ExecStart=/bin/node /app/server.js
+SyslogIdentifier=catalogue
+
+[Install]
+WantedBy=multi-user.target
+
+## run the playbook
+ansible-playbook -i inventory.ini -e "component=catalogue" main.yml
+
+
+#######################################################
+
+tasks
+	main.yaml --> playbook related tasks are here
+files
+	<file-name> --> you can keep all the files required here
+templates
+	<template-file> --> we can keep all the templates with placeholders here. 
+	                    usually we follow jinja2 templating, variables values can be supplied
+vars
+	main.yaml --> all variables required for roles can be kept here.
+	
++			  
+
+
+
+
+FRONTEND:
+==========
+
+###frontend/tasks/main.yml:
+
+- name: disable default nginx
+  ansible.builtin.command: dnf module disable nginx -y
+
+- name: enable nginx
+  ansible.builtin.command: dnf module enable nginx:1.24 -y
+
+- name: install nginx
+  ansible.builtin.dnf:
+    name: nginx
+    state: present
+
+- name: start and enable nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: remove html directory
+  ansible.builtin.file:
+    path: /usr/share/nginx/html
+    state: absent
+
+- name: create html directory
+  ansible.builtin.file:
+    path: /usr/share/nginx/html
+    state: directory
+
+- name: download frontend code
+  ansible.builtin.get_url:
+    url: https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip
+    dest: /tmp/frontend.zip
+
+- name: unzip frontend code
+  ansible.builtin.unarchive:
+    src: /tmp/frontend.zip
+    dest: /usr/share/nginx/html
+    remote_src: yes
+
+- name: remove default nginx conf
+  ansible.builtin.file:
+    path: /etc/nginx/nginx.conf
+    state: absent
+
+- name: copy roboshop nginx conf
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify:
+    - Restart nginx
+
+create Template directory
+
+###frontend/templates/nginx.conf.j2
+
+copy the nginx.conf code
+
+change the below value:
+ location /api/catalogue/ { proxy_pass http://{{ CATALOGUE_HOST }}:8080/; }
+  location /api/user/ { proxy_pass http://localhost:8080/; }
+  location /api/cart/ { proxy_pass http://localhost:8080/; }
+  location /api/shipping/ { proxy_pass http://localhost:8080/; }
+  location /api/payment/ { proxy_pass http://localhost:8080/; }
+  
+#changes only:
+- name: copy roboshop nginx conf
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  
+####fontend/vars/main.yml
+
+CATALOGUE_HOST=catalogue.kimidi.site
+
+
+handlers --> handlers are notifiers in ansible. when there is a change in something 
+              if you want to notify other task  we can use handlers. 
+             for example: change in nginx configure can notify restart nginx task in handlers
+              main.yaml
+ ## Only configurations changes happened that time restart required. i.e called handelers.
+ notify keyword is used to trigger the handlers.
+ 
+ 
+####frontend/handlers/main.yml
+
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+	
+
+
+## ansible-playbook -i inventory.ini -e "component=fronted" main.yml
+
+
+
+
+
+REDIS:
+======== ====================== ==================
+
+roles/redis/tasks/main.yml
+
+copy the redis.yml code
+
+No code changes in redis.
+
+- name: disable redis default module
+  ansible.builtin.command: dnf module disable redis -y
+
+- name: enable redis:7
+  ansible.builtin.command: dnf module enable redis:7 -y
+
+- name: install redis
+  ansible.builtin.dnf:
+    name: redis
+    state: present
+
+- name: allow remote connections
+  ansible.builtin.replace:
+    path: /etc/redis/redis.conf
+    regexp: '127.0.0.1'
+    replace: '0.0.0.0'
+
+- name: disable protected mode
+  ansible.builtin.lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: 'protected-mode'
+    line: protected-mode no
+    
+- name: enable and start redis
+  ansible.builtin.service:
+    name: redis
+    state: started
+    enabled: yes
+
+
+## ansible-playbook -i inventory.ini -e "component=redis" main.yml
+
+USER:
+=== ===========================
+
+###roles/user/tasks/main.yml
+
+- name: app setup
+  include_role:
+    name: common
+    tasks_from: app-setup
+
+- name: nodejs setup
+  include_role:
+    name: common
+    tasks_from: nodejs
+
+- name: systemd setup
+  include_role:
+    name: common
+    tasks_from: systemd.yaml
+	
+###common/systemd.yml --> change the code - catalogue in replace with {{ component }}
+
+- name: copy {{ component }} service to system directory
+  ansible.builtin.template:
+    src: "{{ component }}.service.j2"
+    dest: "/etc/systemd/system/{{ component }}.service"
+	
+- name: start and enable {{ component }}
+  ansible.builtin.service:
+    name: "{{ component }}"
+    state: restarted # even app is not running we can restart
+    enabled: yes
+	
+
+#user/templates/user.service.j2
+
+copy the user.service code
+
+change this lines:
+Environment=REDIS_URL='redis://{{ REDIS_HOST }}:6379'
+Environment=MONGO_URL="mongodb://{{ MONGODB_HOST }}:27017/users"
+
+# user/vars/main.yml
+
+REDIS_HOST: redis.kimidi.site
+MONGODB_HOST: mongodb.kimidi.site
+
+
+## ansible-playbook -i inventory.ini -e "component=user" main.yml
+
+
+CART:
+==== ================= =============================
+####roles/cart/tasks/main.yml
+
+- name: app setup
+  include_role:
+    name: common
+    tasks_from: app-setup
+
+- name: nodejs setup
+  include_role:
+    name: common
+    tasks_from: nodejs
+
+- name: systemd setup
+  include_role:
+    name: common
+    tasks_from: systemd.yaml
+	
+	
+####/cart/template/cart.service.j2:  changes these lines:
+
+Environment=REDIS_HOST={{ REDIS_HOST }}
+Environment=CATALOGUE_HOST={{ CATALOGUE_HOST }}
+
+
+## /cart/vars/main.yml
+CATALOGUE_HOST: catalogue.kimidi.site
+REDIS_HOST: redis.kimidi.site
+
+## ansible-playbook -i inventory.ini -e "component=cart" main.yml
+
+####Goto frontend/templates/nginx.conf.j2- change the localhost to
+
+ location /api/user/ { proxy_pass http://{{ USER_HOST }}:8080/; }
+ location /api/cart/ { proxy_pass http://{{ CART_HOST }}:8080/; }
+ 
+ 
+ ####fronted/vars/main.yml-- add these host lines
+  
+CATALOGUE_HOST: catalogue.kimidi.site
+USER_HOST: user.kimidi.site
+CART_HOST: cart.kimidi.site
+
+
+
+
+MYSQL:
+==== ================ ============================
+####roles/mysql/tasks/main.yml
+
+copy the mysql.yml code
+
+
+## ansible-playbook -i inventory.ini -e "component=mysql" main.yml
+
+
+
+SHIPPING:
+=== ======== ===============
+roles/shipping/tasks/main.yml
+
+- name: app setup
+  include_role:
+    name: common
+    tasks_from: app-setup
+	
+- name: maven setup
+  include_role:
+    name: common
+    tasks_from: maven
+	
+- name: import data
+  community.mysql.mysql_db:
+    name: all
+    login_user: "{{ MYSQL_ROOT_USER }}"
+    login_password: "{{ MYSQL_ROOT_PASSWORD }}"
+    login_host: "{{ MYSQL_HOST }}"
+    state: import
+    target: "{{ item }}"
+  loop:
+  - /app/db/schema.sql
+  - /app/db/app-user.sql
+  - /app/db/master-data.sql
+  
+ - name: systemd setup
+   include_role:
+    name: common
+    tasks_from: systemd
+	
+##shipping/templates/service.j2
+
+[Unit]
+Description=Shipping Service
+
+[Service]
+User=roboshop
+// highlight-start
+Environment=CART_ENDPOINT={{ CART_HOST }}:8080
+Environment=DB_HOST={{ MYSQL_HOST }}
+// highlight-end
+ExecStart=/bin/java -jar /app/shipping.jar
+SyslogIdentifier=shipping
+
+[Install]
+WantedBy=multi-user.target
+
+
+### shipping/vars/main.yml
+
+MYSQL_HOST: mysql.kimidi.site
+MYSQL_ROOT_USER: root
+MYSQL_ROOT_PASSWORD: RoboShop@1
+CART_HOST: cart.kimidi.site
+	
+	
+### /common/tasks/maven.yml
+
+- name: install maven and mysql
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: installed
+  loop:
+  - maven
+  - mysql
+  
+- name: install PyMySQL and cryptography 
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    executable: pip3.9
+  loop:
+  - cryptography
+  - PyMySQL
+
+- name: install maven dependencies
+  ansible.builtin.command: mvn clean package
+  args:
+    chdir: /app
+
+- name: rename jar file
+  ansible.builtin.command: "mv target/{{ component }}-1.0.jar {{ component }}.jar"
+  args:
+    chdir: /app
+	
+## ansible-playbook -i inventory.ini -e "component=shipping" main.yml
+
+
+Rabbitmq:
+==== ================ ============================
+
+roles/rabbitmq/tasks/main.yml:
+
+- name: copy rabbitmq repo
+  ansible.builtin.copy:
+    src: rabbitmq.repo
+    dest: /etc/yum.repos.d/rabbitmq.repo
+
+- name: install rabbitmq-server
+  ansible.builtin.dnf:
+    name: rabbitmq-server
+    state: installed
+
+- name: enable and start rabbitmq
+  ansible.builtin.service:
+    name: rabbitmq-server
+    state: started
+    enabled: yes
+
+- name: create rabbitmq user
+  community.rabbitmq.rabbitmq_user:
+    user: roboshop
+    password: roboshop123
+    permissions:
+      - vhost: /
+        configure_priv: .*
+        read_priv: .*
+        write_priv: .*
+    state: present
+	
+##rabbitmq/files/rabbitmq.repo
+
+copy the rabbitmq.repo code
+
+## ansible-playbook -i inventory.ini -e "component=rabbitmq" main.yml
+
+
+Payment:
+======= =================== ==================
+payment/tasks/main.yml:
+
+- name: app setup
+  include_role:
+    name: common
+    tasks_from: app-setup
+
+- name: python setup
+  include_role:
+    name: common
+    tasks_from: python
+
+- name: systemd setup
+  include_role:
+    name: common
+    tasks_from: systemd
+	
+
+###payment/templates/payment.service.j2
+
+copy the payment.service code
+
+###payment/vars/main.yml
+
+CART_HOST: cart.kimidi.site
+USER_HOST: user.kimidi.site
+RABBITMQ_HOST: rabbitmq.kimidi.site
+RABBITMQ_USER: roboshop
+RABBITMQ_PASSWORD: roboshop123
+
+####/common/tasks/python.yml
+
+- name: install python3 packages
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: installed
+  loop:
+  - python3 
+  - gcc 
+  - python3-devel
+
+- name: install dependencies
+  ansible.builtin.pip:
+    requirements: requirements.txt
+    executable: pip3.9
+  args:
+    chdir: /app
+	
+	
+## ansible-playbook -i inventory.ini -e "component=payment" main.yml
+	
+	

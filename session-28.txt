@@ -1,0 +1,41 @@
+Import_role VS Include_role:
+===== ========== ==========
+
+1. import_role
+
+Use import_role when you want the role tasks loaded at playbook parse time.
+
+example:
+
+---
+- hosts: all
+
+  tasks:
+    - import_role:
+        name: apache
+
+Ansible loads role immediately.
+
+
+2.include_role with condition:
+---
+- hosts: all
+
+  tasks:
+    - include_role:
+        name: apache
+      when: ansible_os_family == "RedHat"
+	  
+Here role runs only if system is RedHat.
+
+
+include_role --> it will include tasks in run time, it will validate also in run time, it will not pre process.
+
+Tags and when conditions apply only to the include_role statement itself, not the tasks within the role.
+
+import_role --> ansible validate import_role before playbook execution
+Tags and when conditions apply to the imported role and its tasks.
+
+import_role loads role statically at parse time before execution.
+include_role loads role dynamically at runtime during playbook execution.
+include_role supports loops and conditions better.

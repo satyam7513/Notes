@@ -1,0 +1,241 @@
+
+SHIPPING:
+=== ====
+[shipping]
+shipping.kimidi.site
+
+shipping.service --> copy the code.
+
+
+shipping.yml:
+=== ==========
+- name: configure shipping
+  hosts: shipping
+  become: yes
+  tasks:
+  - name: install maven and mysql
+    ansible.builtin.dnf:
+	    name: "{{ item }}"
+		state: installed
+	loop:
+	- maven
+	- mysql
+	
+  - name: install PyMySQL and cryptography ##These are needed so Ansible can talk to MySQL database.”
+    ansible.builtin.pip:
+      name: "{{ item }}"
+      executable: pip3.9
+    loop:
+    - cryptography
+    - PyMySQL
+		
+  - name: create app directory
+    ansible.builtin.file:
+	    path: /app
+		state: directory
+		   
+		
+  - name: create roboshop system user
+    ansible.builtin.user:
+	   name: roboshop
+	   shell: /sbin/nologin
+	   system: true
+	   home: /app
+	   
+  - name: download shipping code
+    ansible.builtin.get_url:
+	  url: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip 
+      dest: /tmp/shipping.zip
+
+  - name: extract shipping code
+    ansible.builtin.unarchive:
+      src: /tmp/shipping.zip
+      dest: /app
+      remote_src: yes
+  
+  - name: install maven dependencies
+    ansible.builtin.command: mvn clean package
+	args:  # Now we are in tmp directory, we want to change the directory using arg in asnible.
+	  chdir: /app
+	  
+## run the playbook ansible-playbook -i inventory.ini shipping.yml
+
+   - name: rename the jar file
+     ansible.builtin.command: mv target/shipping-1.0.jar shipping.jar
+     args:
+	   chdir: /app
+	   
+    - name: copy the shipping service
+	  ansible.builtin.copy:
+	     src: shipping.service
+		 dest: /etc/systemd/system/system/shipping.service
+		 
+    - name: daemon reload
+	  ansible.builtin.systemd_service:
+	      daemon_reload: true
+		  
+	- name: enable and start shipping
+	  ansible.builtin.service:
+	     name: shipping
+		 state: started
+		 enabled: yes
+		 
+ #Enable & start failed beacuse mysql schema is not configured.
+ 
+		 
+# search google in ansible in mysql modules:
+
+# first you want to check mysqldb connected or not.
+#check you can connect to mysql using app user.
+#if yes than it means data is already imported.
+#if no means not imported, we can use import.
+##It connects to MySQL
+        Imports SQL files:
+         schema (tables)
+         user data
+         master data ######
+
+ - name: import data
+   tags:
+    - import ##“Only database import will run.”- "ansible-playbook shipping.yml -t import"
+   community.mysql.mysql_db:
+      name: all
+      login_user: root
+      login_password: RoboShop@1
+      login_host: mysql.kimidi.site
+      state: import
+      target: "{{ item }}"
+    loop:
+    - /app/db/schema.sql
+    - /app/db/app-user.sql
+    - /app/db/master-data.sql
+   
+ # run the playbook with import only
+ # ansible-playbook -i inventory.ini -e ansible_user=ec2-user -e ansible_password=DevOps321 shipping.yml -t import
+ 
+  - name: restart shipping
+    tags:
+    - import
+    ansible.builtin.service:
+      state: restarted
+      name: shipping
+  
+
+
+After add the shipping domain in frontend and restart the nginx.
+===== ================= ============================= ======================================
+
+
+RABBIT MQ:
+====== ===
+
+[rabbitmq]
+rabbitmq.kimidi.site
+
+copy the rabbitmq.repo code
+
+rabbitmq.yml:
+==== ======
+
+- name: setup rabbitmq component
+  become: yes
+  hosts: rabbitmq
+  tasks:
+  - name: copy rabbitmq repo
+    ansible.builtin.copy:
+      src: rabbitmq.repo
+      dest: /etc/yum.repos.d/rabbitmq.repo
+
+  - name: install rabbitmq-server
+    ansible.builtin.dnf:
+      name: rabbitmq-server
+      state: installed
+  
+  - name: enable and start rabbitmq
+    ansible.builtin.service:
+      name: rabbitmq-server
+      state: started
+      enabled: yes
+
+  - name: create rabbitmq user
+    community.rabbitmq.rabbitmq_user:
+      user: roboshop
+      password: roboshop123
+      permissions:
+        - vhost: /
+          configure_priv: .*
+          read_priv: .*
+          write_priv: .*
+      state: present
+	  
+	  
+=== ===================== =========================== =================================== =====================
+
+PAYMENT:
+==== ===
+[payment]
+payment.kimidi.site
+
+payment.yml:
+==== =======
+
+- name: conigure payment server
+  become: yes
+  hosts: payment
+  tasks:
+  - name: install python3 packages
+    ansible.builtin.dnf:
+      name: "{{ item }}"
+      state: installed
+    loop:
+    - python3 
+    - gcc 
+    - python3-devel
+
+  - name: create app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory
+
+  - name: create roboshop system user
+    ansible.builtin.user:
+      name: roboshop
+      shell: /sbin/nologin
+      system: true
+      home: /app
+
+  - name: download payment code
+    ansible.builtin.get_url:
+      url: https://roboshop-artifacts.s3.amazonaws.com/payment-v3.zip 
+      dest: /tmp/payment.zip
+
+  - name: extract payment code
+    ansible.builtin.unarchive:
+      src: /tmp/payment.zip
+      dest: /app
+      remote_src: yes
+
+  - name: install dependencies
+    ansible.builtin.pip:
+      requirements: requirements.txt
+      executable: pip3.9
+    args:
+      chdir: /app
+
+  - name: copy payment service
+    ansible.builtin.copy:
+      src: payment.service
+      dest: /etc/systemd/system/payment.service
+
+  - name: daemon reload
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+
+  - name: enable and start payment
+    ansible.builtin.service:
+      name: payment
+      state: started
+      enabled: yes
+
+
+  
