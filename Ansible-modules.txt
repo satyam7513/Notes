@@ -1,0 +1,117 @@
+1. copy
+
+Used to copy a file from the Ansible control machine to the target server.
+
+When to use
+
+Send config files
+Deploy scripts
+Copy application files
+
+We use copy module to transfer files from Ansible server to managed nodes.
+
+2. dnf
+
+Used to install, remove, or update packages on RHEL 8/9 systems.
+dnf module manages packages on RHEL-based Linux systems.
+
+DNF When to use
+
+Install software packages
+Update packages
+Remove packages
+
+3. service
+
+Used to start, stop, restart services.
+
+Manage application services
+Start services after installation
+
+4. replace
+
+Used to replace text inside an existing file using regex.
+replace module updates matching text in files using regular expressions.
+
+Change configuration values
+Update ports
+Modify settings
+
+5. user
+
+Used to create, modify, delete users.user module manages Linux user accounts.
+
+Create application users
+Manage system users
+
+6. file
+
+Used to create/remove files, directories, symlinks, permissions.
+file module manages file properties and directory creation.
+
+Create directories
+Change ownership
+Delete files
+
+
+7. get_url
+
+Used to download files from internet/URL to remote server.
+get_url downloads files from web directly to target nodes.
+
+Download packages
+Download tar files
+Download binaries
+
+8. unarchive
+
+Used to extract zip/tar files.
+unarchive extracts compressed files on remote systems.
+
+Extract downloaded software
+Deploy archives.
+
+9. community.general.npm
+
+Used to install Node.js packages via npm.
+
+Install node packages
+Manage JavaScript dependencies
+
+10. ansible.builtin.systemd_service
+
+Used to manage services specifically with systemd.
+
+Enable service
+Restart daemon
+Manage systemd services
+
+11. register
+
+register captures task output and stores it in a variable.
+
+Save command output
+Use task result later
+Conditional execution
+
+12. pip
+
+pip module manages Python packages on remote hosts.
+
+Install Python dependencies
+Application libraries
+
+13. community.rabbitmq.rabbitmq_user
+
+rabbitmq_user manages RabbitMQ users and permissions.
+
+Create broker users
+Assign permissions.
+
+(Q)“Which modules have you used in Ansible?”
+
+
+In my project I commonly used modules like copy, dnf, service, replace, user, file, get_url, 
+unarchive, npm, systemd_service, pip, rabbitmq_user and register. 
+These modules help for package installation, file management, service management, 
+user management, downloading software, extracting files and storing task output.
